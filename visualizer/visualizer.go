@@ -8,17 +8,7 @@ import (
 	"sort"
 )
 
-type Station struct {
-	Name string
-	X, Y int
-}
-
-type Graph struct {
-	Stations    map[string]Station
-	Connections map[string][]string
-}
-
-type Graph2 struct {
+type Network2 struct {
 	Stations    map[uint16]Station
 	Connections map[uint16][]uint16
 }
@@ -36,32 +26,32 @@ type Turns struct {
 }
 
 func main() {
-	g := Graph{nil, nil}
+	n := Network{nil, nil}
 	r := RoutesUsed{"", "", nil, false}
 	t := Turns{nil, false}
 	trains := 0
 	labels := true
-	createMap(g, r, t, trains, labels)
+	createMap(n, r, t, trains, labels)
 }
 
-func createMap(g Graph, r RoutesUsed, t Turns, trains int, labels bool) {
-	g = Graph{make(map[string]Station), make(map[string][]string)}
-	g.Stations["beethoven"] = Station{"beethoven", 1, 6}
-	g.Stations["verdi"] = Station{"verdi", 7, 1}
-	g.Stations["albinoni"] = Station{"albinoni", 1, 1}
-	g.Stations["handel"] = Station{"handel", 3, 14}
-	g.Stations["mozart"] = Station{"mozart", 14, 9}
-	g.Stations["part"] = Station{"part", 10, 0}
-	g.Connections["beethoven"] = append(g.Connections["beethoven"], "handel", "albinoni", "verdi")
-	g.Connections["verdi"] = append(g.Connections["verdi"], "beethoven", "part", "albinoni")
-	g.Connections["albinoni"] = append(g.Connections["albinoni"], "verdi", "beethoven", "mozart")
-	g.Connections["handel"] = append(g.Connections["handel"], "mozart", "beethoven")
-	g.Connections["mozart"] = append(g.Connections["mozart"], "handel", "albinoni", "part")
-	g.Connections["part"] = append(g.Connections["part"], "verdi", "mozart")
-	//g = generateGrid(10, 10)
+func createMap(n Network, r RoutesUsed, t Turns, trains int, labels bool) {
+	n = Network{make(map[string]Station), make(map[string][]string)}
+	n.Stations["beethoven"] = Station{"beethoven", 1, 6}
+	n.Stations["verdi"] = Station{"verdi", 7, 1}
+	n.Stations["albinoni"] = Station{"albinoni", 1, 1}
+	n.Stations["handel"] = Station{"handel", 3, 14}
+	n.Stations["mozart"] = Station{"mozart", 14, 9}
+	n.Stations["part"] = Station{"part", 10, 0}
+	n.Connections["beethoven"] = append(n.Connections["beethoven"], "handel", "albinoni", "verdi")
+	n.Connections["verdi"] = append(n.Connections["verdi"], "beethoven", "part", "albinoni")
+	n.Connections["albinoni"] = append(n.Connections["albinoni"], "verdi", "beethoven", "mozart")
+	n.Connections["handel"] = append(n.Connections["handel"], "mozart", "beethoven")
+	n.Connections["mozart"] = append(n.Connections["mozart"], "handel", "albinoni", "part")
+	n.Connections["part"] = append(n.Connections["part"], "verdi", "mozart")
+	//n = generateGrid(10, 10)
 	r = RoutesUsed{"beethoven", "part", [][]string{{"verdi"}, {"handel", "mozart"}}, true}
 	//t = Turns{[]string{"T1-station_011", "T1-station_021 T2-station_011", "T1-station_022 T2-station_021", "T1-station_032 T2-station_022", "T1-station_033 T2-station_032", "T1-station_034 T2-station_033", "T2-station_034"}, true}
-	svgMap(g, r, t, 3, labels)
+	svgMap(n, r, t, 3, labels)
 }
 
 func sx(x, minX int, s float64) float64 {
@@ -72,7 +62,7 @@ func sy(y, minY int, s float64) float64 {
 	return (float64(y - minY)) * s
 }
 
-func svgMap(g Graph, r RoutesUsed, t Turns, trains int, labels bool) {
+func svgMap(n Network, r RoutesUsed, t Turns, trains int, labels bool) {
 	//create a [stationname] map that saves the color-to-be-used, empty if not part of found path
 	colorMap := make(map[string]string, 0)
 	if r.Exists {
@@ -89,7 +79,7 @@ func svgMap(g Graph, r RoutesUsed, t Turns, trains int, labels bool) {
 	minX, maxX := math.MaxInt, math.MinInt
 	minY, maxY := math.MaxInt, math.MinInt
 
-	for _, s := range g.Stations {
+	for _, s := range n.Stations {
 		if s.X < minX {
 			minX = s.X
 		}
@@ -104,7 +94,7 @@ func svgMap(g Graph, r RoutesUsed, t Turns, trains int, labels bool) {
 		}
 	}
 
-	density := math.Sqrt(float64(len(g.Stations)))
+	density := math.Sqrt(float64(len(n.Stations)))
 	width := maxX - minX
 	height := maxY - minY
 	canvas := 1000.0 //baseline that actual coordinates get scaled against
@@ -171,10 +161,10 @@ svg {
 
 	//loop through all stations, loop through connected stations, check if connection has already been drawn, draw connection if not
 	usedConnection := make(map[string]struct{}, 0)
-	for startS, endS := range g.Connections {
-		startSStation := g.Stations[startS]
+	for startS, endS := range n.Connections {
+		startSStation := n.Stations[startS]
 		for _, toS := range endS {
-			endSStation := g.Stations[toS]
+			endSStation := n.Stations[toS]
 			_, ok1 := usedConnection[startSStation.Name+"|"+endSStation.Name]
 			_, ok2 := usedConnection[endSStation.Name+"|"+startSStation.Name]
 			if ok1 || ok2 {
@@ -193,8 +183,8 @@ svg {
 	}
 
 	//create and sort a slice by x position, so that rightmost elements get drawn first (so that labels can be drawn on top of them)
-	stationSlice := make([]Station, 0, len(g.Stations))
-	for _, s := range g.Stations {
+	stationSlice := make([]Station, 0, len(n.Stations))
+	for _, s := range n.Stations {
 		stationSlice = append(stationSlice, s)
 	}
 	sort.Slice(stationSlice, func(i, j int) bool {
@@ -367,17 +357,17 @@ updateButtons();
 
 // generate a grid where stations are 100 x/y apart + small random adjustment
 // every station checks if it's not the last on its row/column, and if not, adds connections to those instead
-func generateGrid(rows, cols int) Graph {
+func generateGrid(rows, cols int) Network {
 	rng := rand.New(rand.NewSource(62))
 
-	g := Graph{make(map[string]Station), make(map[string][]string)}
+	n := Network{make(map[string]Station), make(map[string][]string)}
 
 	for y := 0; y < rows; y++ {
 		for x := 0; x < cols; x++ {
 			name := fmt.Sprintf("station_%03d", y*cols+x)
 			px := x*100 + rng.Intn(31) - 15
 			py := y*100 + rng.Intn(31) - 15
-			g.Stations[name] = Station{name, px, py}
+			n.Stations[name] = Station{name, px, py}
 		}
 	}
 
@@ -386,14 +376,14 @@ func generateGrid(rows, cols int) Graph {
 			curr := fmt.Sprintf("station_%03d", y*cols+x)
 			if x+1 < cols {
 				right := fmt.Sprintf("station_%03d", y*cols+x+1)
-				g.Connections[curr] = append(g.Connections[curr], right)
+				n.Connections[curr] = append(n.Connections[curr], right)
 			}
 			if y+1 < rows {
 				down := fmt.Sprintf("station_%03d", (y+1)*cols+x)
-				g.Connections[curr] = append(g.Connections[curr], down)
+				n.Connections[curr] = append(n.Connections[curr], down)
 			}
 		}
 	}
 
-	return g
+	return n
 }
