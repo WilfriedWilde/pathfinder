@@ -18,8 +18,6 @@ type Graph struct {
 	Connections map[string][]string
 }
 
-g.Connections["euston"]
-
 type Graph2 struct {
 	Stations    map[uint16]Station
 	Connections map[uint16][]uint16
@@ -60,7 +58,6 @@ func createMap(g Graph, r RoutesUsed, t Turns, trains int, labels bool) {
 	g.Connections["handel"] = append(g.Connections["handel"], "mozart", "beethoven")
 	g.Connections["mozart"] = append(g.Connections["mozart"], "handel", "albinoni", "part")
 	g.Connections["part"] = append(g.Connections["part"], "verdi", "mozart")
-	g.Connections["part"] = append(g.Connections["part"], &g.Stations["verdi"], "mozart")
 	//g = generateGrid(10, 10)
 	r = RoutesUsed{"beethoven", "part", [][]string{{"verdi"}, {"handel", "mozart"}}, true}
 	//t = Turns{[]string{"T1-station_011", "T1-station_021 T2-station_011", "T1-station_022 T2-station_021", "T1-station_032 T2-station_022", "T1-station_033 T2-station_032", "T1-station_034 T2-station_033", "T2-station_034"}, true}
