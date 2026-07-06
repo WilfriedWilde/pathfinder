@@ -207,11 +207,11 @@ func main() {
 	_, foundEnd := network.Stations[endStation]
 
 	if !foundStart {
-		fmt.Println("Error: start session does not exist")
+		fmt.Println("Error: start station does not exist")
 	}
 
 	if !foundEnd {
-		fmt.Println("Error: end session does not exist")
+		fmt.Println("Error: end station does not exist")
 	}
 
 	if !foundStart || !foundEnd {
