@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -16,13 +17,16 @@ type Station struct {
 type Network struct {
 	Stations    map[string]Station
 	Connections map[string][]string
+	Coordinates map[string]struct{}
 }
 
 func main() {
 	network := Network{
-		Stations: make(map[string]Station),
+		Stations:    make(map[string]Station),
 		Connections: make(map[string][]string),
+		Coordinates: make(map[string]struct{}),
 	}
+
 	// check number command line arguments
 	args := os.Args
 	if len(args) < 5 {
@@ -43,16 +47,17 @@ func main() {
 	// parse data from network map
 	file, err := os.Open(networkMapPath)
 	if err != nil {
-		fmt.Println("Error opening file:",  err)
+		fmt.Println("Error opening file:", err)
 		return
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 
-	var readingStations, readingConnections bool 
+	var readingStations, readingConnections bool
+	var hasStationsSection, hasConnectionsSection bool
 
-	for scanner.Scan(){
+	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		hashtagIndex := strings.Index(line, "#")
 
@@ -66,9 +71,12 @@ func main() {
 		}
 
 		if line == "stations:" {
+			hasStationsSection = true
 			readingStations = true
+			readingConnections = false
 			continue
 		} else if line == "connections:" {
+			hasConnectionsSection = true
 			readingStations = false
 			readingConnections = true
 			continue
@@ -80,8 +88,9 @@ func main() {
 				fmt.Println("Error: station data corrupted")
 			}
 
-			stationName, xStr, yStr := split[0], split[1], split[2]
-			
+			stationName, xStr, yStr := strings.TrimSpace(split[0]), strings.TrimSpace(split[1]), strings.TrimSpace(split[2])
+
+			// check if station name is valid
 			if strings.ContainsFunc(stationName, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
 			}) {
@@ -104,8 +113,23 @@ func main() {
 
 			station := Station{
 				Name: stationName,
-				X: x,
-				Y: y,
+				X:    x,
+				Y:    y,
+			}
+
+			// check if coordinates already exist
+			coords := fmt.Sprintf("%s,%s", xStr, yStr)
+			if _, found := network.Coordinates[coords]; found {
+				fmt.Printf("Error: coordinates %s are duplicated", coords)
+				return
+			}
+
+			network.Coordinates[coords] = struct{}{}
+
+			// check if station name is duplicated
+			if _, found := network.Stations[stationName]; found {
+				fmt.Printf("Error: station name %s is duplicated\n", stationName)
+				return
 			}
 
 			network.Stations[stationName] = station
@@ -113,10 +137,12 @@ func main() {
 			split := strings.Split(line, "-")
 			if len(split) != 2 {
 				fmt.Println("Error: connection data corrupted")
+				return
 			}
 
-			stationNameA, stationNameB := split[0], split[1]
-			
+			stationNameA, stationNameB := strings.TrimSpace(split[0]), strings.TrimSpace(split[1])
+
+			// check if station name is valid
 			if strings.ContainsFunc(stationNameA, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
 			}) {
@@ -124,6 +150,7 @@ func main() {
 				return
 			}
 
+			// check if station name is valid
 			if strings.ContainsFunc(stationNameB, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
 			}) {
@@ -131,12 +158,45 @@ func main() {
 				return
 			}
 
+			// check if connections are already existing
+			if len(network.Connections[stationNameA]) > 0 && slices.Contains(network.Connections[stationNameA], stationNameB) {
+				fmt.Printf("Error: a connection is already existing between %s and %s\n", stationNameA, stationNameB)
+				return
+			}
+
+			if len(network.Connections[stationNameB]) > 0 && slices.Contains(network.Connections[stationNameB], stationNameA) {
+				fmt.Printf("Error: a connection is already existing between %s and %s\n", stationNameA, stationNameB)
+				return
+			}
+
 			network.Connections[stationNameA] = append(network.Connections[stationNameA], stationNameB)
+			network.Connections[stationNameB] = append(network.Connections[stationNameB], stationNameA)
 		}
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Scanner error:", err)
+		return
+	}
+
+	// check if connections are made with valid stations
+	for stationName := range network.Connections {
+		if _, found := network.Stations[stationName]; !found {
+			fmt.Printf("Error: connection made with unexisting station %s\n", stationName)
+			return
+		}
+	}
+
+	// check if network map includes both stations and connections sections
+	if !hasStationsSection {
+		fmt.Println("Error: network map doesn't include a 'stations' section")
+	}
+
+	if !hasConnectionsSection {
+		fmt.Println("Error: network map doesn't include a 'connections' section")
+	}
+
+	if !hasStationsSection || !hasConnectionsSection {
 		return
 	}
 
@@ -164,6 +224,11 @@ func main() {
 		return
 	}
 
+	// check max number stations
+	if len(network.Stations) > 10000 {
+		fmt.Println("Error: the network map can only contains up to 10000 stations")
+		return
+	}
 
-
+	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
 }
