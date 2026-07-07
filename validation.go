@@ -45,7 +45,7 @@ func parseAndValidateNetwork(networkPath, startStation, endStation string) (Netw
 	// parse data from network map
 	file, err := os.Open(networkPath)
 	if err != nil {
-		return Network{}, fmt.Errorf("Error opening file:", err)
+		return Network{}, fmt.Errorf("Error opening file: %v", err.Error())
 	}
 	defer file.Close()
 
@@ -160,14 +160,14 @@ func parseAndValidateNetwork(networkPath, startStation, endStation string) (Netw
 	}
 
 	if err := scanner.Err(); err != nil {
-		return Network{}, fmt.Errorf("Scanner error:", err)
+		return Network{}, fmt.Errorf("Scanner error: %v", err.Error())
 	}
 
 	if err := validateNetwork(network, hasStationsSection, hasConnectionsSection, startStation, endStation); err != nil {
 		return Network{}, err
 	}
 
-	return Network{}, nil
+	return network, nil
 }
 
 func validateNetwork(network Network, hasStationsSection, hasConnectionsSection bool, startStation, endStation string) error {
