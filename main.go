@@ -26,6 +26,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	routes, ok := removeShortest(&network, startStation, endStation)
+
+	fmt.Println(routes, ok)
+
 	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, numTrains)
 
 	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
