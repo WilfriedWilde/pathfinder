@@ -8,6 +8,16 @@ import (
 	"sort"
 )
 
+type Station struct {
+	Name string
+	X, Y int
+}
+
+type Network struct {
+	Stations    map[string]Station
+	Connections map[string][]string
+}
+
 type Network2 struct {
 	Stations    map[uint16]Station
 	Connections map[uint16][]uint16
@@ -208,8 +218,8 @@ svg {
 	//initialize all required trains so they can be easily moved in js, also hide by default
 	for i := 1; i <= trains; i++ {
 		fmt.Fprintf(f, `<g class="train" id="T%d" visibility="hidden">`+"\n", i)
-		fmt.Fprintf(f, `<circle cx="%f" cy="%f" r="%.2f" fill="brown" stroke="brown"/>`+"\n", 0, 0, radius*0.8)
-		fmt.Fprintf(f, `<text x="%f" y="%f" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T%d</text>`+"\n", 0, 0, fontSize, i)
+		fmt.Fprintf(f, `<circle cx="%f" cy="%f" r="%.2f" fill="brown" stroke="brown"/>`+"\n", 0., 0., radius*0.8)
+		fmt.Fprintf(f, `<text x="%f" y="%f" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T%d</text>`+"\n", 0., 0., fontSize, i)
 		fmt.Fprintln(f, `</g>`)
 
 	}
