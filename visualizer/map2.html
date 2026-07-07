@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<body>
+<svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1200 1200">
+<style>
+</style>
+<line x1="642.857143" y1="0.000000" x2="428.571429" y2="71.428571" stroke="blue" stroke-width="2.00"/>
+<line x1="642.857143" y1="0.000000" x2="928.571429" y2="642.857143" stroke="blue" stroke-width="2.00"/>
+<line x1="0.000000" y1="428.571429" x2="142.857143" y2="1000.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="0.000000" y1="428.571429" x2="0.000000" y2="71.428571" stroke="grey" stroke-width="2.00"/>
+<line x1="0.000000" y1="428.571429" x2="428.571429" y2="71.428571" stroke="blue" stroke-width="2.00"/>
+<line x1="428.571429" y1="71.428571" x2="0.000000" y2="71.428571" stroke="grey" stroke-width="2.00"/>
+<line x1="0.000000" y1="71.428571" x2="928.571429" y2="642.857143" stroke="grey" stroke-width="2.00"/>
+<line x1="142.857143" y1="1000.000000" x2="928.571429" y2="642.857143" stroke="blue" stroke-width="2.00"/>
+<g class="station">
+<circle id="mozart" cx="928.571429" cy="642.857143" r="6.00" stroke="orange" fill="orange"/>
+<text x="940.57" y="635.86" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">mozart</text>
+</g>
+<g class="station">
+<circle id="part" cx="642.857143" cy="0.000000" r="6.00" stroke="red" fill="red"/>
+<text x="654.86" y="-7.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">part</text>
+</g>
+<g class="station">
+<circle id="verdi" cx="428.571429" cy="71.428571" r="6.00" stroke="orange" fill="orange"/>
+<text x="440.57" y="64.43" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">verdi</text>
+</g>
+<g class="station">
+<circle id="handel" cx="142.857143" cy="1000.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="154.86" y="993.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">handel</text>
+</g>
+<g class="station">
+<circle id="albinoni" cx="0.000000" cy="71.428571" r="6.00" stroke="black"/>
+<text x="12.00" y="64.43" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">albinoni</text>
+</g>
+<g class="station">
+<circle id="beethoven" cx="0.000000" cy="428.571429" r="6.00" stroke="green" fill="green"/>
+<text x="12.00" y="421.57" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">beethoven</text>
+</g>
+<g class="train" id="T1" visibility="hidden">
+<circle cx="%!f(int=0)" cy="%!f(int=0)" r="4.80" fill="brown" stroke="brown"/>
+<text x="%!f(int=0)" y="%!f(int=0)" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T1</text>
+</g>
+<g class="train" id="T2" visibility="hidden">
+<circle cx="%!f(int=0)" cy="%!f(int=0)" r="4.80" fill="brown" stroke="brown"/>
+<text x="%!f(int=0)" y="%!f(int=0)" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T2</text>
+</g>
+<g class="train" id="T3" visibility="hidden">
+<circle cx="%!f(int=0)" cy="%!f(int=0)" r="4.80" fill="brown" stroke="brown"/>
+<text x="%!f(int=0)" y="%!f(int=0)" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T3</text>
+</g>
+</svg>
+<div id="controls">
+	<button id="prev">Previous</button>
+	<span id="turnLabel"></span>
+	<button id="next">Next</button>
+</div>
+<script>
+
+
+//viewbox panning/zooming
+const svg = document.getElementById("map");
+const viewBox = svg.viewBox.baseVal;
+
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+
+svg.addEventListener("wheel", e => {
+	e.preventDefault();
+	const rect = svg.getBoundingClientRect();
+	const mouseX = (e.clientX - rect.left) / rect.width;
+	const mouseY = (e.clientY - rect.top) / rect.height;
+	const oldWidth = viewBox.width;
+	const oldHeight = viewBox.height;
+	const factor = 1.2;
+
+	if (e.deltaY < 0) {
+		viewBox.width /= factor;
+		viewBox.height /= factor;
+	} else {
+		viewBox.width *= factor;
+		viewBox.height *= factor;
+	}
+
+	const widthDiff = oldWidth - viewBox.width;
+	const heightDiff = oldHeight - viewBox.height;
+
+	viewBox.x += widthDiff * mouseX;
+	viewBox.y += heightDiff * mouseY;
+});
+
+svg.addEventListener("mousedown", e => {
+	dragging = true;
+	lastX = e.clientX;
+	lastY = e.clientY;
+});
+
+window.addEventListener("mouseup", () => {
+	dragging = false;
+});
+
+window.addEventListener("mousemove", e => {
+
+	if (!dragging) {
+		return;
+	}
+
+	const dx = e.clientX - lastX;
+	const dy = e.clientY - lastY;
+
+	viewBox.x -= dx * (viewBox.width / svg.clientWidth);
+	viewBox.y -= dy * (viewBox.height / svg.clientHeight);
+
+	lastX = e.clientX;
+	lastY = e.clientY;
+});
+</script>
+</body>
+</html>
