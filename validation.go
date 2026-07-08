@@ -10,14 +10,14 @@ import (
 )
 
 func GetAndValidateUserInput(args []string) (config Config, err error) {
-	// check number command line arguments
-	if len(args) < 5 {
+	// check number command-line arguments
+	if len(args) < 4 {
 		return config, fmt.Errorf("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	}
 
 	// extract args
-	config.networkPath, config.startStation, config.endStation = args[1], args[2], args[3]
-	numTrainsStr := args[4]
+	config.networkPath, config.startStation, config.endStation = args[0], args[1], args[2]
+	numTrainsStr := args[3]
 
 	// check if start station is the same as end station
 	if config.startStation == config.endStation {
