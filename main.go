@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 )
 
 type Station struct {
@@ -22,24 +23,30 @@ type TrainRoute struct {
 	Trains      int
 }
 
+type Config struct {
+	networkPath  string
+	startStation string
+	endStation   string
+	numTrains    int
+}
+
 func main() {
-	networkPath, startStation, endStation, numTrains, err := getAndValidateUserInput()
+	config, err := GetAndValidateUserInput(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	network, err := parseAndValidateNetwork(networkPath, startStation, endStation)
+	network, err := ParseAndValidateNetwork(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	routes, ok := removeShortest(&network, startStation, endStation)
+	routes, ok := removeShortest(&network, config.startStation, config.endStation)
 
 	fmt.Println("routes:", routes, ok)
+	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
 
-	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, numTrains)
-
-	trainRoutes := divert(routes, numTrains)
+	trainRoutes := divert(routes, config.numTrains)
 	for _, v := range trainRoutes {
 		fmt.Println(v.ID, v.Route, v.RouteLength, v.Trains)
 	}
