@@ -28,7 +28,7 @@ func main() {
 
 	routes, ok := removeShortest(&network, startStation, endStation)
 
-	fmt.Println(routes, ok)
+	fmt.Println("routes:", routes, ok)
 
 	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, numTrains)
 
