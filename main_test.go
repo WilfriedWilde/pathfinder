@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -63,5 +64,34 @@ func TestGetAndValidateUserInput(t *testing.T) {
 }
 
 func TestParseAndValidateNetwork(t *testing.T) {
+	tests := map[string]struct {
+		input  Config
+		output Network
+		err    string
+	}{
+		"Invalid station name": {
+			input: Config{
+				networkPath:  "networks/invalid_station_name.txt",
+				startStation: "waterloo",
+				endStation:   "euston",
+				numTrains:    20,
+			},
+			output: Network{},
+			err:    "Error: station name not valid",
+		},
+	}
 
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			network, err := ParseAndValidateNetwork(test.input)
+			var resultError string
+			if err != nil {
+				resultError = err.Error()
+			}
+
+			if !reflect.DeepEqual(network, test.output) || resultError != test.err {
+				t.Errorf("got: %v %q, expected: %v %q", network, resultError, test.output, test.err)
+			}
+		})
+	}
 }
