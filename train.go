@@ -26,18 +26,7 @@ func divert(routes [][]string, trains int) []TrainRoute {
 
 		// not enough trains to fully increment all routes to match the next longest route length
 		if trains < needed {
-			increment := trains / groupSize
-			remainder := trains % groupSize
-
-			for j := 0; j < groupSize; j++ {
-				trainRoutes[j].RouteLength += increment
-				trainRoutes[j].Trains += increment
-			}
-
-			for j := 0; j < remainder; j++ {
-				trainRoutes[j].RouteLength++
-				trainRoutes[j].Trains++
-			}
+			distributeTrains(trains, groupSize, trainRoutes)
 			trains = 0
 			break
 		}
@@ -52,31 +41,22 @@ func divert(routes [][]string, trains int) []TrainRoute {
 	}
 
 	if trains > 0 {
-		groupSize := len(trainRoutes)
-		increment := trains / groupSize
-		remainder := trains % groupSize
-
-		for j := 0; j < groupSize; j++ {
-			trainRoutes[j].RouteLength += increment
-			trainRoutes[j].Trains += increment
-		}
-
-		for j := 0; j < remainder; j++ {
-			trainRoutes[j].RouteLength++
-			trainRoutes[j].Trains++
-		}
+		distributeTrains(trains, len(trainRoutes), trainRoutes)
 	}
-	// "greedy algorithm", simpler, way less efficient once train number goes up
-	// for trains > 0 {
-	// 	trainRoutes[0].Trains++
-	// 	trainRoutes[0].RouteLength++
-	// 	if len(trainRoutes) > 1 && trainRoutes[0].RouteLength > trainRoutes[1].RouteLength {
-	// 		sort.Slice(trainRoutes, func(i, j int) bool {
-	// 			return trainRoutes[i].RouteLength < trainRoutes[j].RouteLength
-	// 		})
-	// 	}
-	// 	trains--
-	// }
 	return trainRoutes
+}
 
+func distributeTrains(trains, groupSize int, trainRoutes []TrainRoute) {
+	increment := trains / groupSize
+	remainder := trains % groupSize
+
+	for j := 0; j < groupSize; j++ {
+		trainRoutes[j].RouteLength += increment
+		trainRoutes[j].Trains += increment
+	}
+
+	for j := 0; j < remainder; j++ {
+		trainRoutes[j].RouteLength++
+		trainRoutes[j].Trains++
+	}
 }
