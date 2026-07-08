@@ -9,32 +9,31 @@ import (
 	"strings"
 )
 
-func getAndValidateUserInput() (networkPath, startStation, endStation string, numTrains int, err error) {
+func GetAndValidateUserInput(args []string) (config Config, err error) {
 	// check number command line arguments
-	args := os.Args
 	if len(args) < 5 {
-		return "", "", "", 0, fmt.Errorf("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
+		return config, fmt.Errorf("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	}
 
 	// extract args
-	networkPath, startStation, endStation = args[1], args[2], args[3]
+	config.networkPath, config.startStation, config.endStation = args[1], args[2], args[3]
 	numTrainsStr := args[4]
 
 	// check if start station is the same as end station
-	if startStation == endStation {
-		return "", "", "", 0, fmt.Errorf("Error: start and end stations should be different")
+	if config.startStation == config.endStation {
+		return config, fmt.Errorf("Error: start and end stations should be different")
 	}
 
 	// check if number of train is valid positive integer
-	numTrains, err = strconv.Atoi(numTrainsStr)
-	if err != nil || numTrains < 1 {
-		return "", "", "", 0, fmt.Errorf("Error: number of train should be positive integer")
+	config.numTrains, err = strconv.Atoi(numTrainsStr)
+	if err != nil || config.numTrains < 1 {
+		return config, fmt.Errorf("Error: number of train should be positive integer")
 	}
 
 	return
 }
 
-func parseAndValidateNetwork(networkPath, startStation, endStation string) (Network, error) {
+func ParseAndValidateNetwork(config Config) (Network, error) {
 	network := Network{
 		Stations:    make(map[string]Station),
 		Connections: make(map[string][]string),
@@ -43,7 +42,7 @@ func parseAndValidateNetwork(networkPath, startStation, endStation string) (Netw
 	coordinates := make(map[string]struct{})
 
 	// parse data from network map
-	file, err := os.Open(networkPath)
+	file, err := os.Open(config.networkPath)
 	if err != nil {
 		return Network{}, fmt.Errorf("Error opening file: %v", err.Error())
 	}
@@ -163,14 +162,14 @@ func parseAndValidateNetwork(networkPath, startStation, endStation string) (Netw
 		return Network{}, fmt.Errorf("Scanner error: %v", err.Error())
 	}
 
-	if err := validateNetwork(network, hasStationsSection, hasConnectionsSection, startStation, endStation); err != nil {
+	if err := validateNetwork(network, hasStationsSection, hasConnectionsSection, config); err != nil {
 		return Network{}, err
 	}
 
 	return network, nil
 }
 
-func validateNetwork(network Network, hasStationsSection, hasConnectionsSection bool, startStation, endStation string) error {
+func validateNetwork(network Network, hasStationsSection, hasConnectionsSection bool, config Config) error {
 	// check if connections are made with valid stations
 	for stationName := range network.Connections {
 		if _, found := network.Stations[stationName]; !found {
@@ -188,8 +187,8 @@ func validateNetwork(network Network, hasStationsSection, hasConnectionsSection 
 	}
 
 	// check if start and end stations exist
-	_, foundStart := network.Stations[startStation]
-	_, foundEnd := network.Stations[endStation]
+	_, foundStart := network.Stations[config.startStation]
+	_, foundEnd := network.Stations[config.endStation]
 
 	if !foundStart {
 		return fmt.Errorf("Error: start station does not exist")
