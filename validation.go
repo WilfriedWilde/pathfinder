@@ -12,7 +12,7 @@ import (
 func GetAndValidateUserInput(args []string) (config Config, err error) {
 	// check number command-line arguments
 	if len(args) < 4 {
-		return config, fmt.Errorf("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
+		return Config{}, fmt.Errorf("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	}
 
 	// extract args
@@ -21,13 +21,13 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 
 	// check if start station is the same as end station
 	if config.startStation == config.endStation {
-		return config, fmt.Errorf("Error: start and end stations should be different")
+		return Config{}, fmt.Errorf("Error: start and end stations should be different")
 	}
 
 	// check if number of train is valid positive integer
 	config.numTrains, err = strconv.Atoi(numTrainsStr)
 	if err != nil || config.numTrains < 1 {
-		return config, fmt.Errorf("Error: number of train should be positive integer")
+		return Config{}, fmt.Errorf("Error: number of train should be positive integer")
 	}
 
 	return
