@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func getTurns(trainRoutes []TrainRoute) []string {
+func printTurns(trainRoutes []TrainRoute) {
 	totalRoutes := len(trainRoutes)
 
 	for i, route := range trainRoutes {
@@ -16,8 +16,6 @@ func getTurns(trainRoutes []TrainRoute) []string {
 	// plus (Trains - 1) extra turns for staggered starts, since each train departs
 	// one turn after the previous one.
 	totalTurns := trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1)
-
-	turns := make([]string, totalTurns)
 
 	var maxTrains int
 	for _, route := range trainRoutes { // get the max number of trains across all routes to avoid out of range looping through it
@@ -34,7 +32,7 @@ func getTurns(trainRoutes []TrainRoute) []string {
 			for routeInd, route := range trainRoutes {
 				if trainInd >= route.Trains { // check if train index exceeds the number of train in current route
 					skipedTrains++
-					continue
+					break
 				}
 
 				stationInd := turnNum - trainInd // calculate station indexs
@@ -46,8 +44,6 @@ func getTurns(trainRoutes []TrainRoute) []string {
 			}
 		}
 
-		turns[turnNum] = strings.TrimSpace(turn.String())
+		fmt.Println(turn.String())
 	}
-
-	return turns
 }

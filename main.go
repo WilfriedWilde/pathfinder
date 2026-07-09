@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 type Station struct {
@@ -73,9 +74,9 @@ func main() {
 	for i, v := range trainRoutes {
 		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
 	}
+	now := time.Now()
+	printTurns(trainRoutes)
+	timeTaken := time.Since(now)
+	fmt.Println(timeTaken)
 
-	turns := getTurns(trainRoutes)
-	for _, t := range turns {
-		fmt.Println(t)
-	}
 }
