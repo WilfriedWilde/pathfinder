@@ -1,29 +1,28 @@
 package main
 
 func convertIntoFlow(n *Network, start, end string) FlowNetwork {
-	f := FlowNetwork{make(map[int]string), make(map[int][]Edge)}
+	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]Edge)}
 	index := 0
-	indLookUpMap := make(map[string]int) // two separate maps for index <--> name switcheroos, only need to keep one alive outside of this function
 	for station := range n.Connections {
 		if station == start || station == end { // don't split start or end
-			f.Name[index] = station
-			indLookUpMap[station] = index
+			f.IDToName[index] = station
+			f.NameToID[station] = index
 			index++
 			continue
 		}
-		f.Name[index], f.Name[index+1] = station, station // in, out
-		addEdge(f.Connections, index, index+1)            // connect station_in into station_out
-		indLookUpMap[station] = index
+		f.IDToName[index], f.IDToName[index+1] = station, station // in, out
+		addEdge(f.Connections, index, index+1)                    // connect station_in into station_out
+		f.NameToID[station] = index
 		index += 2
 	}
 
 	for station, connections := range n.Connections {
-		from := indLookUpMap[station] // out
+		from := f.NameToID[station] // out
 		if station != start && station != end {
 			from++
 		}
 		for _, conn := range connections {
-			to := indLookUpMap[conn]         // in
+			to := f.NameToID[conn]           // in
 			addEdge(f.Connections, from, to) // connect station_out into conn_in
 		}
 	}
