@@ -24,9 +24,9 @@ type FlowNetwork struct {
 }
 
 type Edge struct {
-	To   int
-	Flow bool
-	Rev  int
+	To     int
+	Usable bool
+	Rev    int
 }
 
 type TrainRoute struct {
