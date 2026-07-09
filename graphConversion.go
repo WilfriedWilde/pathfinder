@@ -17,19 +17,20 @@ func convertIntoFlow(n *Network, start, end string) FlowNetwork {
 	}
 
 	for station, connections := range n.Connections {
-		from := f.NameToID[station] // out
+		from := f.NameToID[station] // in, or start/end
 		if station != start && station != end {
-			from++
+			from++ // out
 		}
 		for _, conn := range connections {
 			to := f.NameToID[conn]           // in
-			addEdge(f.Connections, from, to) // connect station_out into conn_in
+			addEdge(f.Connections, from, to) // connect station_out (or start/end) into conn_in (or start/end)
 		}
 	}
 	return f
 }
 
-// always create edge and its reverse (the old single connection, split into two) at the same time to keep indices correct
+// add forward edge and reverse edge at the same time, so the indices are correct
+// not splitting the original connection, but redirecting it and then adding a reverse edge
 func addEdge(edgeMap map[int][]Edge, from, to int) {
 	edgeMap[from] = append(edgeMap[from], Edge{
 		To:   to,
