@@ -31,6 +31,7 @@ func convertIntoFlow(n *Network, start, end string) FlowNetwork {
 
 // add forward edge and reverse edge at the same time, so the indices are correct
 // not splitting the original connection, but redirecting it and then adding a reverse edge
+// reverse edge only used for potential backtracking? never for main pathfinding?
 func addEdge(edgeMap map[int][]Edge, from, to int) {
 	edgeMap[from] = append(edgeMap[from], Edge{
 		To:   to,
