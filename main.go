@@ -16,6 +16,17 @@ type Network struct {
 	Connections map[string][]string
 }
 
+type FlowNetwork struct {
+	Name        map[int]string
+	Connections map[int][]Edge
+}
+
+type Edge struct {
+	To   int
+	Flow bool
+	Rev  int
+}
+
 type TrainRoute struct {
 	RouteLength int
 	Route       []string
@@ -38,6 +49,14 @@ func main() {
 	network, err := ParseAndValidateNetwork(config)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	flowNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
+	fmt.Println("")
+	for stationID, edges := range flowNetwork.Connections {
+		fmt.Printf("ID: %d Name: %s\n", stationID, flowNetwork.Name[stationID])
+		fmt.Println(edges)
+
 	}
 
 	routes, ok := removeShortest(&network, config.startStation, config.endStation)

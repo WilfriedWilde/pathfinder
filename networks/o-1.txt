@@ -1,0 +1,23 @@
+# one short path blocking two unique paths
+
+connections:
+start-short_1
+short_1-short_2
+short_2-end
+start-top_long_1
+top_long_1-top_long_2
+top_long_2-short_2
+short_1-bottom_long_1
+bottom_long_1-bottom_long_2
+bottom_long_2-end
+
+stations:
+start, 1, 5
+short_1, 3, 5
+short_2, 5, 5
+end, 7, 5
+top_long_1, 2, 8
+top_long_2, 4, 8
+bottom_long_1, 4, 2
+bottom_long_2, 6, 2
+
