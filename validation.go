@@ -80,7 +80,8 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 		if readingStations {
 			split := strings.Split(line, ",")
 			if len(split) != 3 {
-				fmt.Println("Error: station data corrupted")
+				return Network{}, fmt.Errorf("Error: station data corrupted\n")
+
 			}
 
 			stationName, xStr, yStr := strings.TrimSpace(split[0]), strings.TrimSpace(split[1]), strings.TrimSpace(split[2])

@@ -16,6 +16,18 @@ type Network struct {
 	Connections map[string][]string
 }
 
+type FlowNetwork struct {
+	IDToName    map[int]string
+	NameToID    map[string]int
+	Connections map[int][]Edge
+}
+
+type Edge struct {
+	To   int
+	Flow bool
+	Rev  int
+}
+
 type TrainRoute struct {
 	RouteLength int
 	Route       []string
@@ -40,10 +52,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	routes, found := removeShortest(&network, config.startStation, config.endStation)
-	if !found {
-		log.Fatal("Error: no path exists between the start and end stations")
+	flowNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
+
+	routes, ok := removeShortest(&network, config.startStation, config.endStation)
+	if !ok {
+		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
 	}
+
+	flowRoute, ok := BFSFlow(&flowNetwork, flowNetwork.NameToID[config.startStation], flowNetwork.NameToID[config.endStation])
+	fmt.Print("Flowroute: ")
+	fmt.Println(flowRoute)
+
+	fmt.Println("routes:", routes, ok)
+	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
 
 	// fmt.Println("routes:", routes, found)
 	// fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)

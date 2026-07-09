@@ -21,7 +21,7 @@ func divert(routes [][]string, trains int) []TrainRoute {
 		if diff == 0 {
 			continue
 		}
-		groupSize := i + 1 // number of routes we hanve handled so far, so to increment them by two, we need to have groupsize * 2 trains to use
+		groupSize := i + 1 // number of routes we have handled so far, so to increment them by two, we need to have groupsize * 2 trains to use
 		needed := diff * groupSize
 
 		// not enough trains to fully increment all routes to match the next longest route length
