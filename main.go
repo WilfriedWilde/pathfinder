@@ -66,10 +66,16 @@ func main() {
 	fmt.Println("routes:", routes, ok)
 	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
 
+	// fmt.Println("routes:", routes, found)
+	// fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
+
 	trainRoutes := divert(routes, config.numTrains)
-	for _, v := range trainRoutes {
-		fmt.Println(v.Route, v.RouteLength, v.Trains)
+	for i, v := range trainRoutes {
+		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
 	}
 
-	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
+	turns := getTurns(trainRoutes)
+	for _, t := range turns {
+		fmt.Println(t)
+	}
 }
