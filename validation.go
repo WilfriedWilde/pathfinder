@@ -59,7 +59,6 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 
 		if hashtagIndex != -1 {
 			line = strings.TrimSpace(line[:hashtagIndex])
-			continue
 		}
 
 		if line == "" {
