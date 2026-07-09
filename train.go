@@ -6,8 +6,8 @@ import (
 
 func divert(routes [][]string, trains int) []TrainRoute {
 	trainRoutes := make([]TrainRoute, 0)
-	for ind, route := range routes {
-		trainRoutes = append(trainRoutes, TrainRoute{ind, len(route) - 1, route[1:], 0})
+	for _, route := range routes {
+		trainRoutes = append(trainRoutes, TrainRoute{len(route) - 1, route[1:], 0})
 	}
 
 	// sort once, so we only need to loop once going from smallest to largest
@@ -33,7 +33,6 @@ func divert(routes [][]string, trains int) []TrainRoute {
 
 		// increment to match next longest route length
 		for j := 0; j < groupSize; j++ {
-			trainRoutes[j].RouteLength += diff
 			trainRoutes[j].Trains += diff
 		}
 
@@ -51,12 +50,10 @@ func distributeTrains(trains, groupSize int, trainRoutes []TrainRoute) {
 	remainder := trains % groupSize
 
 	for j := 0; j < groupSize; j++ {
-		trainRoutes[j].RouteLength += increment
 		trainRoutes[j].Trains += increment
 	}
 
 	for j := 0; j < remainder; j++ {
-		trainRoutes[j].RouteLength++
 		trainRoutes[j].Trains++
 	}
 }

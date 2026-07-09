@@ -17,7 +17,6 @@ type Network struct {
 }
 
 type TrainRoute struct {
-	ID          int
 	RouteLength int
 	Route       []string
 	Trains      int
@@ -48,7 +47,7 @@ func main() {
 
 	trainRoutes := divert(routes, config.numTrains)
 	for _, v := range trainRoutes {
-		fmt.Println(v.ID, v.Route, v.RouteLength, v.Trains)
+		fmt.Println(v.Route, v.RouteLength, v.Trains)
 	}
 
 	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
