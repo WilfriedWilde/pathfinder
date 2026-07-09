@@ -51,5 +51,6 @@ func main() {
 		fmt.Println(v.ID, v.Route, v.RouteLength, v.Trains)
 	}
 
+	turns := getTurns(trainRoutes, config.numTrains)
 	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
 }
