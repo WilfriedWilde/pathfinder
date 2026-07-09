@@ -40,9 +40,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	routes, ok := removeShortest(&network, config.startStation, config.endStation)
+	routes, found := removeShortest(&network, config.startStation, config.endStation)
+	if !found {
+		log.Fatal("Error: no path exists between the start and end stations")
+	}
 
-	fmt.Println("routes:", routes, ok)
+	fmt.Println("routes:", routes, found)
 	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
 
 	trainRoutes := divert(routes, config.numTrains)
@@ -51,5 +54,7 @@ func main() {
 	}
 
 	turns := getTurns(trainRoutes, config.numTrains)
-	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
+	for _, t := range turns {
+		fmt.Println(t)
+	}
 }
