@@ -34,14 +34,14 @@ func convertIntoFlow(n *Network, start, end string) FlowNetwork {
 // reverse edge only used for potential backtracking? never for main pathfinding?
 func addEdge(edgeMap map[int][]Edge, from, to int) {
 	edgeMap[from] = append(edgeMap[from], Edge{
-		To:   to,
-		Flow: false,
-		Rev:  len(edgeMap[to]), // does not exist yet, will be created below
+		To:     to,
+		Usable: true,             // all forward edges are traversable at start, none of the reverse edges are - swapping booleans upon using an edge should enable the reverse and disable the used edge
+		Rev:    len(edgeMap[to]), // does not exist yet, will be created below
 	})
 
 	edgeMap[to] = append(edgeMap[to], Edge{
-		To:   from,
-		Flow: false,
-		Rev:  len(edgeMap[from]) - 1, // was just created above
+		To:     from,
+		Usable: false,
+		Rev:    len(edgeMap[from]) - 1, // was just created above
 	})
 }
