@@ -1,11 +1,47 @@
 package main
 
 import (
-//	"fmt"
+	"fmt"
+	"strings"
 )
 
-func getTurns(trainRoutes []TrainRoute, numTrains int) []string {
-	turns := make([]string, 0)
+func getTurns(trainRoutes []TrainRoute) []string {
+	totalRoutes := len(trainRoutes)
+
+	// Total turns = length of smallest route (turns needed for one train to complete it)
+	// plus (Trains - 1) extra turns for staggered starts, since each train departs
+	// one turn after the previous one.
+	totalTurns := trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1)
+
+	turns := make([]string, totalTurns)
+
+	var maxTrains int
+	for _, route := range trainRoutes { // get the max number of trains across all routes to avoid out of range looping through it
+		if route.Trains > maxTrains {
+			maxTrains = route.Trains
+		}
+	}
+
+	for turnNum := range totalTurns {
+		var turn strings.Builder
+
+		for trainInd := range maxTrains {
+			for routeInd, route := range trainRoutes {
+				if trainInd >= route.Trains { // check if train index exceeds the number of train in current route
+					continue
+				}
+
+				stationInd := turnNum - trainInd // calculate station indexs
+
+				if !(stationInd < 0 || stationInd > route.RouteLength-1) { // check if train has already started or arrived, in other words if it's in movement
+					label := trainInd*totalRoutes + routeInd + 1
+					fmt.Fprintf(&turn, "T%d-%s ", label, route.Route[stationInd])
+				}
+			}
+		}
+
+		turns[turnNum] = strings.TrimSpace(turn.String())
+	}
 
 	return turns
 }
