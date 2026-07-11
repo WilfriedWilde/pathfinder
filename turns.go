@@ -2,9 +2,40 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
+func printTurns(trainRoutes []TrainRoute) {
+	turns := make([]strings.Builder, trainRoutes[0].RouteLength+(trainRoutes[0].Trains-1))
+
+	var maxTrains int
+	for _, route := range trainRoutes {
+		if route.Trains > maxTrains {
+			maxTrains = route.Trains
+		}
+	}
+
+	label := 1
+	for trainNum := 1; trainNum <= maxTrains; trainNum++ {
+		for _, route := range trainRoutes {
+			if trainNum > route.Trains {
+				break
+			}
+			for stationInd, station := range route.Route {
+				turnNum := stationInd + trainNum - 1
+				turns[turnNum].WriteString(fmt.Sprintf("T%s-%s ", strconv.Itoa(label), station))
+			}
+			label++
+		}
+	}
+
+	for _, turn := range turns {
+		fmt.Println(turn.String())
+	}
+}
+
+/*
 func printTurns(trainRoutes []TrainRoute) {
 	totalRoutes := len(trainRoutes)
 
@@ -26,19 +57,19 @@ func printTurns(trainRoutes []TrainRoute) {
 
 	for turnNum := range totalTurns {
 		var turn strings.Builder
-		skipedTrains := 0
+		skippedTrains := 0
 
 		for trainInd := range maxTrains {
 			for routeInd, route := range trainRoutes {
 				if trainInd >= route.Trains { // check if train index exceeds the number of train in current route
-					skipedTrains++
+					skippedTrains++
 					break
 				}
 
 				stationInd := turnNum - trainInd // calculate station indexs
 
 				if !(stationInd < 0 || stationInd > route.RouteLength-1) { // check if train has already started or arrived, in other words if it's in movement
-					label := trainInd*totalRoutes + routeInd + 1 - skipedTrains
+					label := trainInd*totalRoutes + routeInd + 1 - skippedTrains
 					fmt.Fprintf(&turn, "T%d-%s ", label, route.Route[stationInd])
 				}
 			}
@@ -47,3 +78,4 @@ func printTurns(trainRoutes []TrainRoute) {
 		fmt.Println(turn.String())
 	}
 }
+*/

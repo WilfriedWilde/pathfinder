@@ -5,9 +5,9 @@ import (
 )
 
 func divert(routes [][]string, trains int) []TrainRoute {
-	trainRoutes := make([]TrainRoute, 0)
-	for _, route := range routes {
-		trainRoutes = append(trainRoutes, TrainRoute{len(route) - 1, route[1:], 0})
+	trainRoutes := make([]TrainRoute, len(routes))
+	for i, route := range routes {
+		trainRoutes[i] = TrainRoute{len(route) - 1, route[1:], 0}
 	}
 
 	// sort once, so we only need to loop once going from smallest to largest
