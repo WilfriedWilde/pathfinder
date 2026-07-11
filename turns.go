@@ -17,13 +17,13 @@ func printTurns(trainRoutes []TrainRoute) {
 	}
 
 	label := 1
-	for trainNum := 1; trainNum <= maxTrains; trainNum++ {
+	for trainNum := range maxTrains {
 		for _, route := range trainRoutes {
-			if trainNum > route.Trains {
+			if trainNum >= route.Trains {
 				break
 			}
 			for stationInd, station := range route.Route {
-				turnNum := stationInd + trainNum - 1
+				turnNum := stationInd + trainNum
 				turns[turnNum].WriteString(fmt.Sprintf("T%s-%s ", strconv.Itoa(label), station))
 			}
 			label++
