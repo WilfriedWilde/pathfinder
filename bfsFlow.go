@@ -5,8 +5,8 @@ import (
 	"slices"
 )
 
-func EK(f *FlowNetwork, start, end int) ([][]string, int) {
-	ret := make([][]string, 0)
+func EK(f *FlowNetwork, start, end int) ([][][]string, int) {
+	ret := make([][][]string, 0)
 	flow := 0
 	for {
 		usedEdges, found := BFSFlow(f, start, end)
@@ -25,9 +25,7 @@ func EK(f *FlowNetwork, start, end int) ([][]string, int) {
 			}
 		}
 		flow++
-		if flow == 2 {
-			ret = append(ret, ExtractPaths(f, flow, start, end)...)
-		}
+		ret = append(ret, ExtractPaths(f, flow, start, end))
 
 	}
 	if flow == 0 {
@@ -40,6 +38,8 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 
 	paths := make([][]string, 0)
 	path := make([]string, 0)
+
+	modifiedIndexes := make([]int, 0)
 	for i := 0; i < flow; i++ {
 		fmt.Println(i)
 
@@ -51,10 +51,11 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 		curr := start
 		path = []string{}
 		for curr != end {
-			for _, edge := range f.Connections[curr] {
+			for ind, edge := range f.Connections[curr] {
 				if edge.Original && !edge.Usable {
 					if curr == start {
 						edge.Usable = true
+						modifiedIndexes = append(modifiedIndexes, ind)
 					}
 					if curr%2 == 0 {
 						path = append(path, f.IDToName[curr])
@@ -70,6 +71,10 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 		for _, v := range paths {
 			fmt.Println(v)
 		}
+	}
+	// undo graph modifications
+	for _, edgeInd := range modifiedIndexes {
+		f.Connections[start][edgeInd].Usable = false
 	}
 	return paths
 }

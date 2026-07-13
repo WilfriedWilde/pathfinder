@@ -14,10 +14,6 @@ type RoutesUsed struct {
 	Routes [][]string
 }
 
-type Turns struct {
-	TurnData []string
-}
-
 func sx(x, minX int, s float64) float64 {
 	return (float64(x - minX)) * s
 }
@@ -26,7 +22,10 @@ func sy(y, minY int, s float64) float64 {
 	return (float64(y - minY)) * s
 }
 
-func createMap(n Network, r RoutesUsed, t Turns, trains int, labels bool) {
+func createMap(n Network, r RoutesUsed, turnData []string, trains int, labels bool) {
+	for _, v := range r.Routes {
+		v = v[1 : len(v)-1]
+	}
 	//create a [stationname] map that saves the color-to-be-used, empty if not part of found path
 	colorMap := make(map[string]string, 0)
 	colorMap[r.Start] = "green"
@@ -99,7 +98,7 @@ svg {
 }`)
 	}
 	//if turns exist, css for turn buttons
-	if 1 == 1 {
+	if true {
 		fmt.Fprintln(f, `#controls {
 	position: fixed;
 	bottom: 20px;
@@ -247,7 +246,7 @@ window.addEventListener("mousemove", e => {
 });`)
 
 	//arrow key hotkeys for turns, convert turndata into js consts
-	if 1 == 1 {
+	if true {
 		fmt.Fprintf(f, `window.addEventListener("keydown", e => {
 	if (e.key === "ArrowLeft") {
 		e.preventDefault();
@@ -259,7 +258,7 @@ window.addEventListener("mousemove", e => {
 });
 const turns = [
 `)
-		for _, v := range t.TurnData {
+		for _, v := range turnData {
 			fmt.Fprintf(f, "%q,\n", v)
 		}
 		fmt.Fprintln(f, `];`)

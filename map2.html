@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<body>
+<svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1200 1200">
+<style>
+#controls {
+	position: fixed;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	font-family: Arial, sans-serif;
+}
+#controls button {
+	font-size: 14px;
+	cursor: center;
+}
+#turnLabel {
+	min-width: 100px;
+	text-align: center;
+}
+</style>
+<line x1="750.000000" y1="650.000000" x2="250.000000" y2="800.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="750.000000" y1="650.000000" x2="200.000000" y2="450.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="450.000000" y1="800.000000" x2="0.000000" y2="200.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="450.000000" y1="800.000000" x2="250.000000" y2="350.000000" stroke="grey" stroke-width="2.00"/>
+<line x1="450.000000" y1="800.000000" x2="100.000000" y2="600.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="450.000000" y1="800.000000" x2="550.000000" y2="500.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="0.000000" y1="0.000000" x2="100.000000" y2="600.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="0.000000" y1="0.000000" x2="200.000000" y2="450.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="300.000000" y1="50.000000" x2="250.000000" y2="350.000000" stroke="grey" stroke-width="2.00"/>
+<line x1="300.000000" y1="50.000000" x2="250.000000" y2="800.000000" stroke="grey" stroke-width="2.00"/>
+<line x1="50.000000" y1="900.000000" x2="450.000000" y2="0.000000" stroke="grey" stroke-width="2.00"/>
+<line x1="50.000000" y1="900.000000" x2="150.000000" y2="1000.000000" stroke="grey" stroke-width="2.00"/>
+<line x1="450.000000" y1="0.000000" x2="100.000000" y2="600.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="450.000000" y1="0.000000" x2="0.000000" y2="200.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="250.000000" y1="800.000000" x2="550.000000" y2="500.000000" stroke="blue" stroke-width="2.00"/>
+<line x1="200.000000" y1="200.000000" x2="150.000000" y2="1000.000000" stroke="grey" stroke-width="2.00"/>
+<line x1="200.000000" y1="200.000000" x2="550.000000" y2="500.000000" stroke="grey" stroke-width="2.00"/>
+<g class="station">
+<circle id="grasslands" cx="750.000000" cy="650.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="762.00" y="643.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">grasslands</text>
+</g>
+<g class="station">
+<circle id="farms" cx="550.000000" cy="500.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="562.00" y="493.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">farms</text>
+</g>
+<g class="station">
+<circle id="mountain" cx="450.000000" cy="800.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="462.00" y="793.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">mountain</text>
+</g>
+<g class="station">
+<circle id="desert" cx="450.000000" cy="0.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="462.00" y="-7.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">desert</text>
+</g>
+<g class="station">
+<circle id="green_belt" cx="300.000000" cy="50.000000" r="6.00" stroke="black"/>
+<text x="312.00" y="43.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">green_belt</text>
+</g>
+<g class="station">
+<circle id="jungle" cx="250.000000" cy="800.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="262.00" y="793.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">jungle</text>
+</g>
+<g class="station">
+<circle id="village" cx="250.000000" cy="350.000000" r="6.00" stroke="black"/>
+<text x="262.00" y="343.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">village</text>
+</g>
+<g class="station">
+<circle id="suburbs" cx="200.000000" cy="450.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="212.00" y="443.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">suburbs</text>
+</g>
+<g class="station">
+<circle id="downtown" cx="200.000000" cy="200.000000" r="6.00" stroke="black"/>
+<text x="212.00" y="193.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">downtown</text>
+</g>
+<g class="station">
+<circle id="metropolis" cx="150.000000" cy="1000.000000" r="6.00" stroke="black"/>
+<text x="162.00" y="993.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">metropolis</text>
+</g>
+<g class="station">
+<circle id="wetlands" cx="100.000000" cy="600.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="112.00" y="593.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">wetlands</text>
+</g>
+<g class="station">
+<circle id="industrial" cx="50.000000" cy="900.000000" r="6.00" stroke="black"/>
+<text x="62.00" y="893.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">industrial</text>
+</g>
+<g class="station">
+<circle id="treetop" cx="0.000000" cy="200.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="12.00" y="193.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">treetop</text>
+</g>
+<g class="station">
+<circle id="clouds" cx="0.000000" cy="0.000000" r="6.00" stroke="orange" fill="orange"/>
+<text x="12.00" y="-7.00" text-anchor="start" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">clouds</text>
+</g>
+<g class="train" id="T1" visibility="hidden">
+<circle cx="0.000000" cy="0.000000" r="4.80" fill="brown" stroke="brown"/>
+<text x="0.000000" y="0.000000" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T1</text>
+</g>
+<g class="train" id="T2" visibility="hidden">
+<circle cx="0.000000" cy="0.000000" r="4.80" fill="brown" stroke="brown"/>
+<text x="0.000000" y="0.000000" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T2</text>
+</g>
+<g class="train" id="T3" visibility="hidden">
+<circle cx="0.000000" cy="0.000000" r="4.80" fill="brown" stroke="brown"/>
+<text x="0.000000" y="0.000000" font-family="Arial" font-size="20.00" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T3</text>
+</g>
+</svg>
+<div id="controls">
+	<button id="prev">Previous</button>
+	<span id="turnLabel"></span>
+	<button id="next">Next</button>
+</div>
+<script>
+
+
+//viewbox panning/zooming
+const svg = document.getElementById("map");
+const viewBox = svg.viewBox.baseVal;
+
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+
+svg.addEventListener("wheel", e => {
+	e.preventDefault();
+	const rect = svg.getBoundingClientRect();
+	const mouseX = (e.clientX - rect.left) / rect.width;
+	const mouseY = (e.clientY - rect.top) / rect.height;
+	const oldWidth = viewBox.width;
+	const oldHeight = viewBox.height;
+	const factor = 1.2;
+
+	if (e.deltaY < 0) {
+		viewBox.width /= factor;
+		viewBox.height /= factor;
+	} else {
+		viewBox.width *= factor;
+		viewBox.height *= factor;
+	}
+
+	const widthDiff = oldWidth - viewBox.width;
+	const heightDiff = oldHeight - viewBox.height;
+
+	viewBox.x += widthDiff * mouseX;
+	viewBox.y += heightDiff * mouseY;
+});
+
+svg.addEventListener("mousedown", e => {
+	dragging = true;
+	lastX = e.clientX;
+	lastY = e.clientY;
+});
+
+window.addEventListener("mouseup", () => {
+	dragging = false;
+});
+
+window.addEventListener("mousemove", e => {
+
+	if (!dragging) {
+		return;
+	}
+
+	const dx = e.clientX - lastX;
+	const dy = e.clientY - lastY;
+
+	viewBox.x -= dx * (viewBox.width / svg.clientWidth);
+	viewBox.y -= dy * (viewBox.height / svg.clientHeight);
+
+	lastX = e.clientX;
+	lastY = e.clientY;
+});
+window.addEventListener("keydown", e => {
+	if (e.key === "ArrowLeft") {
+		e.preventDefault();
+		document.getElementById("prev").click();
+	} else if (e.key === "ArrowRight") {
+		e.preventDefault();
+		document.getElementById("next").click();
+	}
+});
+const turns = [
+"T1-farms T2-grasslands",
+"T1-mountain T2-suburbs T3-farms",
+"T1-treetop T2-clouds T3-mountain",
+"T1-desert T2-wetlands T3-treetop",
+"T2-desert T3-desert",
+];
+let currentTurn = 0
+function updateButtons() {
+	document.getElementById("turnLabel").textContent =
+		"Turn " + (currentTurn + 1) + " / " + turns.length;
+	document.getElementById("prev").disabled = currentTurn === 0;
+	document.getElementById("next").disabled = currentTurn === turns.length - 1;
+}
+function showTurn(currentTurn) {
+	document.querySelectorAll(".train").forEach(train => {
+		train.setAttribute("visibility", "hidden");
+	});
+	const entries = turns[currentTurn].split(" ");
+	for (const entry of entries) {
+		const [trainName, stationName] = entry.split("-");
+		const station = document.getElementById(stationName);
+		const train = document.getElementById(trainName);
+		const x = station.cx.baseVal.value;
+		const y = station.cy.baseVal.value;
+
+		train.setAttribute("visibility", "visible");
+		//x + offset + offset of offset (+12 +10), y (+10 -7)
+		train.querySelector("circle").setAttribute("cx", x+10);
+		train.querySelector("circle").setAttribute("cy", y+10);
+		train.querySelector("text").setAttribute("x", x+22);
+		train.querySelector("text").setAttribute("y", y+3);
+		}
+	}
+
+	document.getElementById("prev").onclick = () => {
+		if (currentTurn > 0) {
+			currentTurn--;
+			showTurn(currentTurn);
+			updateButtons();
+		}
+	};
+	document.getElementById("next").onclick = () => {
+		if (currentTurn + 1 < turns.length) {
+			currentTurn++;
+			showTurn(currentTurn);
+			updateButtons();
+		}
+	};
+showTurn(currentTurn);
+updateButtons();
+</script>
+</body>
+</html>
