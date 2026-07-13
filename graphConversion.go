@@ -1,7 +1,7 @@
 package main
 
 func convertIntoFlow(n *Network, start, end string) FlowNetwork {
-	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]Edge)}
+	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge)}
 	index := 0
 	for station := range n.Connections {
 		if station == start || station == end { // don't split start or end
@@ -32,16 +32,18 @@ func convertIntoFlow(n *Network, start, end string) FlowNetwork {
 // add forward edge and reverse edge at the same time, so the indices are correct
 // not splitting the original connection, but redirecting it and then adding a reverse edge
 // reverse edge only used for potential backtracking? never for main pathfinding?
-func addEdge(edgeMap map[int][]Edge, from, to int) {
-	edgeMap[from] = append(edgeMap[from], Edge{
-		To:     to,
-		Usable: true,             // all forward edges are traversable at start, none of the reverse edges are - swapping booleans upon using an edge should enable the reverse and disable the used edge
-		Rev:    len(edgeMap[to]), // does not exist yet, will be created below
+func addEdge(edgeMap map[int][]*Edge, from, to int) {
+	edgeMap[from] = append(edgeMap[from], &Edge{
+		To:       to,
+		Usable:   true, // all forward edges are traversable at start, none of the reverse edges are - swapping booleans upon using an edge should enable the reverse and disable the used edge
+		Original: true,
+		Rev:      len(edgeMap[to]), // does not exist yet, will be created below
 	})
 
-	edgeMap[to] = append(edgeMap[to], Edge{
-		To:     from,
-		Usable: false,
-		Rev:    len(edgeMap[from]) - 1, // was just created above
+	edgeMap[to] = append(edgeMap[to], &Edge{
+		To:       from,
+		Usable:   false,
+		Original: false,
+		Rev:      len(edgeMap[from]) - 1, // was just created above
 	})
 }
