@@ -70,12 +70,14 @@ func main() {
 	// fmt.Println("routes:", routes, found)
 	// fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
 
-	trainRoutes := divert(routes, config.numTrains)
+	trainRoutes, maxTurns := divert(routes, config.numTrains)
 	for i, v := range trainRoutes {
 		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
 	}
+	fmt.Println("max turns:", maxTurns)
+
 	now := time.Now()
-	printTurns(trainRoutes)
+	printTurns(trainRoutes, maxTurns)
 	timeTaken := time.Since(now)
 	fmt.Println(timeTaken)
 
