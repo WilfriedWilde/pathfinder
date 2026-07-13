@@ -4,7 +4,7 @@ import (
 	"sort"
 )
 
-func divert(routes [][]string, trains int) []TrainRoute {
+func divert(routes [][]string, trains int) ([]TrainRoute, int) {
 	trainRoutes := make([]TrainRoute, len(routes))
 	for i, route := range routes {
 		trainRoutes[i] = TrainRoute{len(route) - 1, route[1:], 0}
@@ -42,7 +42,8 @@ func divert(routes [][]string, trains int) []TrainRoute {
 	if trains > 0 {
 		distributeTrains(trains, len(trainRoutes), trainRoutes)
 	}
-	return trainRoutes
+
+	return trainRoutes, trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1)
 }
 
 func distributeTrains(trains, groupSize int, trainRoutes []TrainRoute) {

@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-func printTurns(trainRoutes []TrainRoute) {
-	turns := make([]strings.Builder, trainRoutes[0].RouteLength+(trainRoutes[0].Trains-1))
+func printTurns(trainRoutes []TrainRoute, maxTurns int) {
+	turns := make([]strings.Builder, maxTurns)
 
 	var maxTrains int
 	for _, route := range trainRoutes {
