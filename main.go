@@ -86,12 +86,13 @@ func main() {
 	timeTaken := time.Since(now)
 	fmt.Println(timeTaken)
 
-	trainRoutes2 := divert(flowRoutes, config.numTrains)
+	trainRoutes2, maxTurns2 := divert(flowRoutes, config.numTrains)
 	for i, v := range trainRoutes2 {
 		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
 	}
-	printTurns(trainRoutes2)
+	turnData := printTurns(trainRoutes2, maxTurns2)
 	fmt.Println(trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1))
 	fmt.Println(trainRoutes2[0].RouteLength + (trainRoutes2[0].Trains - 1))
+	createMap(network, RoutesUsed{config.startStation, config.endStation, flowRoutes}, Turns{turnData}, config.numTrains, false)
 
 }

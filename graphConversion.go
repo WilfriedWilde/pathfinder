@@ -2,12 +2,16 @@ package main
 
 func convertIntoFlow(n *Network, start, end string) FlowNetwork {
 	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge)}
-	index := 0
+	index := 2
 	for station := range n.Connections {
-		if station == start || station == end { // don't split start or end
-			f.IDToName[index] = station
-			f.NameToID[station] = index
-			index++
+		if station == start { // don't split start or end
+			f.IDToName[0] = station
+			f.NameToID[station] = 0
+			continue
+		}
+		if station == end { // don't split start or end
+			f.IDToName[1] = station
+			f.NameToID[station] = 1
 			continue
 		}
 		f.IDToName[index], f.IDToName[index+1] = station, station // in, out

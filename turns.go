@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
-func printTurns(trainRoutes []TrainRoute, maxTurns int) {
+func printTurns(trainRoutes []TrainRoute, maxTurns int) []string {
 	turns := make([]strings.Builder, maxTurns)
+	turnCAP := 50
+	ret := make([]string, 0)
 
 	var maxTrains int
 	for _, route := range trainRoutes {
@@ -31,8 +33,12 @@ func printTurns(trainRoutes []TrainRoute, maxTurns int) {
 	}
 
 	for _, turn := range turns {
+		if maxTurns <= turnCAP {
+			ret = append(ret, turn.String()[:len(turn.String())-1])
+		}
 		fmt.Println(turn.String())
 	}
+	return ret
 }
 
 /*

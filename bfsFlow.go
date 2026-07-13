@@ -25,7 +25,7 @@ func EK(f *FlowNetwork, start, end int) ([][]string, int) {
 			}
 		}
 		flow++
-		if flow == 3 {
+		if flow == 2 {
 			ret = append(ret, ExtractPaths(f, flow, start, end)...)
 		}
 
