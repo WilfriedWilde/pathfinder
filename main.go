@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
+
+type networks interface {
+	Network | FlowNetwork
+}
 
 type Station struct {
 	Name string
@@ -16,8 +21,20 @@ type Network struct {
 	Connections map[string][]string
 }
 
+type FlowNetwork struct {
+	IDToName    map[int]string
+	NameToID    map[string]int
+	Connections map[int][]*Edge
+}
+
+type Edge struct {
+	To       int
+	Usable   bool
+	Original bool
+	Rev      int
+}
+
 type TrainRoute struct {
-	ID          int
 	RouteLength int
 	Route       []string
 	Trains      int
@@ -41,15 +58,45 @@ func main() {
 		log.Fatal(err)
 	}
 
-	routes, ok := removeShortest(&network, config.startStation, config.endStation)
+	flowNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
 
-	fmt.Println("routes:", routes, ok)
-	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
-
-	trainRoutes := divert(routes, config.numTrains)
-	for _, v := range trainRoutes {
-		fmt.Println(v.ID, v.Route, v.RouteLength, v.Trains)
+	routes, found := removeShortest(&network, config.startStation, config.endStation)
+	if !found {
+		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
 	}
 
-	// TODO: It displays "Error" on stderr when no path exists between the start and end stations.
+	flowRoutes, flow := EK(&flowNetwork, flowNetwork.NameToID[config.startStation], flowNetwork.NameToID[config.endStation])
+
+	fmt.Printf("%+v\n", flowRoutes)
+	fmt.Printf("Flow: %d\n", flow)
+	fmt.Print("Flowroute: ")
+
+	fastestRoutes := getFastestRouteSet(flowRoutes, config.numTrains)
+
+	fmt.Println("routes:", routes, found)
+	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
+
+	// fmt.Println("routes:", routes, found)
+	// fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
+
+	trainRoutes, maxTurns := divert(routes, config.numTrains)
+	for i, v := range trainRoutes {
+		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
+	}
+	fmt.Println("max turns:", maxTurns)
+
+	now := time.Now()
+	printTurns(trainRoutes, maxTurns)
+	timeTaken := time.Since(now)
+	fmt.Println(timeTaken)
+
+	trainRoutes2, maxTurns2 := divert(fastestRoutes, config.numTrains)
+	for i, v := range trainRoutes2 {
+		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
+	}
+	turnData := printTurns(trainRoutes2, maxTurns2)
+	fmt.Println(trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1))
+	fmt.Println(trainRoutes2[0].RouteLength + (trainRoutes2[0].Trains - 1))
+	createMap(network, RoutesUsed{config.startStation, config.endStation, fastestRoutes}, turnData, config.numTrains, true)
+
 }

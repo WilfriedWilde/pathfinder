@@ -8,60 +8,10 @@ import (
 	"sort"
 )
 
-type Station struct {
-	Name string
-	X, Y int
-}
-
-type Network struct {
-	Stations    map[string]Station
-	Connections map[string][]string
-}
-
-type Network2 struct {
-	Stations    map[uint16]Station
-	Connections map[uint16][]uint16
-}
-
 type RoutesUsed struct {
 	Start  string
 	End    string
 	Routes [][]string
-	Exists bool
-}
-
-type Turns struct {
-	TurnData []string
-	Exists   bool
-}
-
-func main() {
-	n := Network{nil, nil}
-	r := RoutesUsed{"", "", nil, false}
-	t := Turns{nil, false}
-	trains := 0
-	labels := true
-	createMap(n, r, t, trains, labels)
-}
-
-func createMap(n Network, r RoutesUsed, t Turns, trains int, labels bool) {
-	n = Network{make(map[string]Station), make(map[string][]string)}
-	n.Stations["beethoven"] = Station{"beethoven", 1, 6}
-	n.Stations["verdi"] = Station{"verdi", 7, 1}
-	n.Stations["albinoni"] = Station{"albinoni", 1, 1}
-	n.Stations["handel"] = Station{"handel", 3, 14}
-	n.Stations["mozart"] = Station{"mozart", 14, 9}
-	n.Stations["part"] = Station{"part", 10, 0}
-	n.Connections["beethoven"] = append(n.Connections["beethoven"], "handel", "albinoni", "verdi")
-	n.Connections["verdi"] = append(n.Connections["verdi"], "beethoven", "part", "albinoni")
-	n.Connections["albinoni"] = append(n.Connections["albinoni"], "verdi", "beethoven", "mozart")
-	n.Connections["handel"] = append(n.Connections["handel"], "mozart", "beethoven")
-	n.Connections["mozart"] = append(n.Connections["mozart"], "handel", "albinoni", "part")
-	n.Connections["part"] = append(n.Connections["part"], "verdi", "mozart")
-	//n = generateGrid(10, 10)
-	r = RoutesUsed{"beethoven", "part", [][]string{{"verdi"}, {"handel", "mozart"}}, true}
-	//t = Turns{[]string{"T1-station_011", "T1-station_021 T2-station_011", "T1-station_022 T2-station_021", "T1-station_032 T2-station_022", "T1-station_033 T2-station_032", "T1-station_034 T2-station_033", "T2-station_034"}, true}
-	svgMap(n, r, t, 3, labels)
 }
 
 func sx(x, minX int, s float64) float64 {
@@ -72,16 +22,17 @@ func sy(y, minY int, s float64) float64 {
 	return (float64(y - minY)) * s
 }
 
-func svgMap(n Network, r RoutesUsed, t Turns, trains int, labels bool) {
+func createMap(n Network, r RoutesUsed, turnData []string, trains int, labels bool) {
+	for _, v := range r.Routes {
+		v = v[1 : len(v)-1]
+	}
 	//create a [stationname] map that saves the color-to-be-used, empty if not part of found path
 	colorMap := make(map[string]string, 0)
-	if r.Exists {
-		colorMap[r.Start] = "green"
-		colorMap[r.End] = "red"
-		for _, v := range r.Routes {
-			for _, v2 := range v {
-				colorMap[v2] = "orange"
-			}
+	colorMap[r.Start] = "green"
+	colorMap[r.End] = "red"
+	for _, v := range r.Routes {
+		for _, v2 := range v {
+			colorMap[v2] = "orange"
 		}
 	}
 
@@ -147,7 +98,7 @@ svg {
 }`)
 	}
 	//if turns exist, css for turn buttons
-	if t.Exists {
+	if true {
 		fmt.Fprintln(f, `#controls {
 	position: fixed;
 	bottom: 20px;
@@ -295,7 +246,7 @@ window.addEventListener("mousemove", e => {
 });`)
 
 	//arrow key hotkeys for turns, convert turndata into js consts
-	if t.Exists {
+	if true {
 		fmt.Fprintf(f, `window.addEventListener("keydown", e => {
 	if (e.key === "ArrowLeft") {
 		e.preventDefault();
@@ -307,7 +258,7 @@ window.addEventListener("mousemove", e => {
 });
 const turns = [
 `)
-		for _, v := range t.TurnData {
+		for _, v := range turnData {
 			fmt.Fprintf(f, "%q,\n", v)
 		}
 		fmt.Fprintln(f, `];`)

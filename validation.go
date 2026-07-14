@@ -59,7 +59,6 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 
 		if hashtagIndex != -1 {
 			line = strings.TrimSpace(line[:hashtagIndex])
-			continue
 		}
 
 		if line == "" {
@@ -81,7 +80,8 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 		if readingStations {
 			split := strings.Split(line, ",")
 			if len(split) != 3 {
-				fmt.Println("Error: station data corrupted")
+				return Network{}, fmt.Errorf("Error: station data corrupted\n")
+
 			}
 
 			stationName, xStr, yStr := strings.TrimSpace(split[0]), strings.TrimSpace(split[1]), strings.TrimSpace(split[2])
@@ -94,11 +94,11 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 			}
 
 			x, xErr := strconv.Atoi(xStr)
-			if xErr != nil || x <= 0 { // Accept 0 and positive integers to match testing examples
+			if xErr != nil || x < 0 { // Accept 0 and positive integers to match testing examples
 				return Network{}, fmt.Errorf("Error: x coordinate for station %s is not a valid integer\n", stationName)
 			}
 			y, yErr := strconv.Atoi(yStr)
-			if yErr != nil || y <= 0 { // Accept 0 and positive integers to match testing examples
+			if yErr != nil || y < 0 { // Accept 0 and positive integers to match testing examples
 				return Network{}, fmt.Errorf("Error: y coordinate for station %s is not a valid integer\n", stationName)
 			}
 

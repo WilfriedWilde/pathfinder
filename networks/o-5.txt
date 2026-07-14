@@ -1,0 +1,10 @@
+# two fully separate station groups, plus a couple of stations connected to nothing at all
+
+connections:
+start-half
+half-end
+
+stations:
+start, 1, 1
+end, 2, 2
+half, 3, 3
