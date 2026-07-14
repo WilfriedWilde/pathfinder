@@ -85,3 +85,16 @@ func printTurns(trainRoutes []TrainRoute) {
 	}
 }
 */
+
+func getFastestRouteSet(routes [][][]string, trains int) [][]string {
+	fastestID := 0
+	_, solutionTurns := divert(routes[0], trains)
+	for i := 1; i < len(routes); i++ {
+		_, ph := divert(routes[i], trains)
+		if ph < solutionTurns {
+			fastestID = i
+			solutionTurns = ph
+		}
+	}
+	return routes[fastestID]
+}

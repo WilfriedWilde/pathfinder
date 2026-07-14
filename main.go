@@ -70,20 +70,8 @@ func main() {
 	fmt.Printf("%+v\n", flowRoutes)
 	fmt.Printf("Flow: %d\n", flow)
 	fmt.Print("Flowroute: ")
-	for i, v := range flowRoutes {
-		fmt.Println(i)
-		fmt.Println(v)
-	}
-	fastestID := 0
-	_, solutionTurns := divert(flowRoutes[0], config.numTrains)
-	for i := 1; i < len(flowRoutes); i++ {
-		_, ph := divert(flowRoutes[i], config.numTrains)
-		if ph < solutionTurns {
-			fastestID = i
-			solutionTurns = ph
-		}
-	}
-	fmt.Printf("Fastest solution uses flow of %d\n", fastestID+1)
+
+	fastestRoutes := getFastestRouteSet(flowRoutes, config.numTrains)
 
 	fmt.Println("routes:", routes, found)
 	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
@@ -102,13 +90,13 @@ func main() {
 	timeTaken := time.Since(now)
 	fmt.Println(timeTaken)
 
-	trainRoutes2, maxTurns2 := divert(flowRoutes[fastestID], config.numTrains)
+	trainRoutes2, maxTurns2 := divert(fastestRoutes, config.numTrains)
 	for i, v := range trainRoutes2 {
 		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
 	}
 	turnData := printTurns(trainRoutes2, maxTurns2)
 	fmt.Println(trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1))
 	fmt.Println(trainRoutes2[0].RouteLength + (trainRoutes2[0].Trains - 1))
-	createMap(network, RoutesUsed{config.startStation, config.endStation, flowRoutes[fastestID]}, turnData, config.numTrains, true)
+	createMap(network, RoutesUsed{config.startStation, config.endStation, fastestRoutes}, turnData, config.numTrains, true)
 
 }
