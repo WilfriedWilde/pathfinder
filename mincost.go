@@ -9,8 +9,8 @@ func MCMF(f *FlowNetwork, start, end int) ([][][]string, int) {
 	ret := make([][][]string, 0)
 	flow := 0
 	for {
-		distance, parents := bellmanFord(f, start, end)
-		if distance[end] == math.MaxInt32 { // no path found
+		parents, found := bellmanFord(f, start, end)
+		if !found { // no path found
 			break
 		}
 		for node := end; node != start; node = parents[node] {
@@ -78,7 +78,7 @@ func ExtractPathsMCMF(f *FlowNetwork, flow, start, end int) [][]string {
 	return paths
 }
 
-func bellmanFord(f *FlowNetwork, start, end int) ([]int, []int) {
+func bellmanFord(f *FlowNetwork, start, end int) ([]int, bool) {
 	distance := make([]int, len(f.IDToName))
 	parents := make([]int, len(f.IDToName))
 	for i := range distance {
@@ -104,6 +104,9 @@ func bellmanFord(f *FlowNetwork, start, end int) ([]int, []int) {
 			break
 		}
 	}
+	if distance[end] == math.MaxInt32 {
+		return nil, false
+	}
 
-	return distance, parents
+	return parents, true
 }
