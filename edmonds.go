@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"slices"
 )
 
@@ -41,13 +40,6 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 
 	modifiedIndexes := make([]int, 0)
 	for i := 0; i < flow; i++ {
-		fmt.Println(i)
-
-		for station, edges := range f.Connections {
-			for _, edge := range edges {
-				fmt.Printf("%+v, %+v, %+v\n", f.IDToName[station], edge, f.IDToName[edge.To])
-			}
-		}
 		curr := start
 		path = []string{}
 		for curr != end {
@@ -68,9 +60,6 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 		}
 		path = append(path, f.IDToName[end])
 		paths = append(paths, path)
-		for _, v := range paths {
-			fmt.Println(v)
-		}
 	}
 	// undo graph modifications
 	for _, edgeInd := range modifiedIndexes {
