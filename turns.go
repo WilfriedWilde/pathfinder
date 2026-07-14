@@ -34,7 +34,7 @@ func printTurns(trainRoutes []TrainRoute, maxTurns int) []string {
 
 	for _, turn := range turns {
 		if maxTurns <= turnCAP {
-			ret = append(ret, turn.String()[:len(turn.String())-1])
+			ret = append(ret, strings.TrimSpace(turn.String()))
 		}
 		fmt.Println(turn.String())
 	}

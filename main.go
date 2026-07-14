@@ -32,6 +32,7 @@ type Edge struct {
 	Usable   bool
 	Original bool
 	Rev      int
+	Cost     int
 }
 
 type TrainRoute struct {
@@ -48,6 +49,7 @@ type Config struct {
 }
 
 func main() {
+	now := time.Now()
 	config, err := GetAndValidateUserInput(os.Args[1:])
 	if err != nil {
 		log.Fatal(err)
@@ -57,46 +59,34 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Network: %+v", network)
-	flowNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
+	edgeNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
 
-	routes, found := removeShortest(&network, config.startStation, config.endStation)
+	repeatedBFSRoutes, found := removeShortest(&network, config.startStation, config.endStation)
 	if !found {
 		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
 	}
 
-	flowRoutes, flow := EK(&flowNetwork, flowNetwork.NameToID[config.startStation], flowNetwork.NameToID[config.endStation])
+	copyFlowNetwork := edgeNetwork.DeepCopy()
+	mcmfRouteSets, _ := MCMF(copyFlowNetwork, edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
 
-	fmt.Printf("%+v\n", flowRoutes)
-	fmt.Printf("Flow: %d\n", flow)
-	fmt.Print("Flowroute: ")
+	ekRouteSets, _ := EK(&edgeNetwork, edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
 
-	fastestRoutes := getFastestRouteSet(flowRoutes, config.numTrains)
+	fastestMCMFRoutes := getFastestRouteSet(mcmfRouteSets, config.numTrains)
+	fastestEKRoutes := getFastestRouteSet(ekRouteSets, config.numTrains)
 
-	fmt.Println("routes:", routes, found)
-	fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
+	_, maxTurnsBFS := divert(repeatedBFSRoutes, config.numTrains)
+	_, maxTurnsEK := divert(fastestEKRoutes, config.numTrains)
+	trainRoutes, maxTurnsMCMF := divert(fastestMCMFRoutes, config.numTrains)
 
-	// fmt.Println("routes:", routes, found)
-	// fmt.Printf("network: %+v\nnumber of trains: %d\n", network, config.numTrains)
+	fmt.Println("------------------------------------------")
+	printTurns(trainRoutes, maxTurnsMCMF)
+	fmt.Println("------------------------------------------")
 
-	trainRoutes, maxTurns := divert(routes, config.numTrains)
-	for i, v := range trainRoutes {
-		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
-	}
-	fmt.Println("max turns:", maxTurns)
+	//createMap(network, RoutesUsed{config.startStation, config.endStation, fastestRoutes}, turnData, config.numTrains, true)
 
-	now := time.Now()
-	printTurns(trainRoutes, maxTurns)
 	timeTaken := time.Since(now)
 	fmt.Println(timeTaken)
-
-	trainRoutes2, maxTurns2 := divert(fastestRoutes, config.numTrains)
-	for i, v := range trainRoutes2 {
-		fmt.Printf("train route %d:\nrouteLength: %v | numTrains: %d\n\n", i, len(v.Route), v.Trains)
-	}
-	turnData := printTurns(trainRoutes2, maxTurns2)
-	fmt.Println(trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1))
-	fmt.Println(trainRoutes2[0].RouteLength + (trainRoutes2[0].Trains - 1))
-	createMap(network, RoutesUsed{config.startStation, config.endStation, fastestRoutes}, turnData, config.numTrains, true)
-
+	fmt.Println("BFS Remove: ", maxTurnsBFS)
+	fmt.Println("Edmonds-Karp: ", maxTurnsEK)
+	fmt.Println("MCMF: ", maxTurnsMCMF)
 }
