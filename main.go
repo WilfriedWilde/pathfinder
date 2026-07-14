@@ -57,7 +57,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	fmt.Printf("Network: %+v", network)
 	flowNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
 
 	routes, found := removeShortest(&network, config.startStation, config.endStation)

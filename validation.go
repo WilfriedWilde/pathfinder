@@ -80,7 +80,7 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 		if readingStations {
 			split := strings.Split(line, ",")
 			if len(split) != 3 {
-				return Network{}, fmt.Errorf("Error: station data corrupted\n")
+				return Network{}, fmt.Errorf("Error: station data corrupted")
 
 			}
 
@@ -95,11 +95,11 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 
 			x, xErr := strconv.Atoi(xStr)
 			if xErr != nil || x < 0 { // Accept 0 and positive integers to match testing examples
-				return Network{}, fmt.Errorf("Error: x coordinate for station %s is not a valid integer\n", stationName)
+				return Network{}, fmt.Errorf("Error: x coordinate for station %s is not a valid positive integer", stationName)
 			}
 			y, yErr := strconv.Atoi(yStr)
 			if yErr != nil || y < 0 { // Accept 0 and positive integers to match testing examples
-				return Network{}, fmt.Errorf("Error: y coordinate for station %s is not a valid integer\n", stationName)
+				return Network{}, fmt.Errorf("Error: y coordinate for station %s is not a valid positive integer", stationName)
 			}
 
 			station := Station{
@@ -118,7 +118,7 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 
 			// check if station name is duplicated
 			if _, found := network.Stations[stationName]; found {
-				return Network{}, fmt.Errorf("Error: station name %s is duplicated\n", stationName)
+				return Network{}, fmt.Errorf("Error: station name %s is duplicated", stationName)
 			}
 
 			network.Stations[stationName] = station
@@ -146,11 +146,11 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 
 			// check if connections are already existing
 			if len(network.Connections[stationNameA]) > 0 && slices.Contains(network.Connections[stationNameA], stationNameB) {
-				return Network{}, fmt.Errorf("Error: a connection is already existing between %s and %s\n", stationNameA, stationNameB)
+				return Network{}, fmt.Errorf("Error: a connection is already existing between %s and %s", stationNameA, stationNameB)
 			}
 
 			if len(network.Connections[stationNameB]) > 0 && slices.Contains(network.Connections[stationNameB], stationNameA) {
-				return Network{}, fmt.Errorf("Error: a connection is already existing between %s and %s\n", stationNameA, stationNameB)
+				return Network{}, fmt.Errorf("Error: a connection is already existing between %s and %s", stationNameB, stationNameA)
 			}
 
 			network.Connections[stationNameA] = append(network.Connections[stationNameA], stationNameB)
@@ -162,18 +162,18 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 		return Network{}, fmt.Errorf("Scanner error: %v", err.Error())
 	}
 
-	if err := validateNetwork(network, hasStationsSection, hasConnectionsSection, config); err != nil {
+	if err := ValidateNetwork(network, hasStationsSection, hasConnectionsSection, config); err != nil {
 		return Network{}, err
 	}
 
 	return network, nil
 }
 
-func validateNetwork(network Network, hasStationsSection, hasConnectionsSection bool, config Config) error {
+func ValidateNetwork(network Network, hasStationsSection, hasConnectionsSection bool, config Config) error {
 	// check if connections are made with valid stations
 	for stationName := range network.Connections {
 		if _, found := network.Stations[stationName]; !found {
-			return fmt.Errorf("Error: connection made with unexisting station %s\n", stationName)
+			return fmt.Errorf("Error: connection made with unexisting station %s", stationName)
 		}
 	}
 
