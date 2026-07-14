@@ -449,3 +449,44 @@ func TestValidateNetwork(t *testing.T) {
 		})
 	}
 }
+
+func TestBFS(t *testing.T) {
+	tests := map[string]struct {
+		network *Network
+		start   string
+		end     string
+		output  []string
+		found   bool
+	}{
+		"Not found": {
+			network: &Network{
+				Stations: map[string]Station{
+					"euston":     {Name: "euston", X: 11, Y: 23},
+					"st_pancras": {Name: "st_pancras", X: 5, Y: 15},
+					"victoria":   {Name: "victoria", X: 6, Y: 7},
+					"waterloo":   {Name: "waterloo", X: 3, Y: 1},
+					"whatever":   {},
+				},
+				Connections: map[string][]string{
+					"euston":     {"waterloo", "st_pancras"},
+					"st_pancras": {"euston", "victoria"},
+					"victoria":   {"waterloo", "st_pancras"},
+					"waterloo":   {"victoria", "euston"},
+				},
+			},
+			start:  "waterloo",
+			end:    "whatever",
+			output: nil,
+			found:  false,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			result, found := BFS(test.network, test.start, test.end)
+			if !reflect.DeepEqual(result, test.output) || found != test.found {
+				t.Errorf("got: %+v %v, expected: %+v %v", result, found, test.output, test.found)
+			}
+		})
+	}
+}
