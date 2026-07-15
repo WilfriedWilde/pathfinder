@@ -41,6 +41,26 @@ func BFS(n *Network, start, end string) ([]string, bool) {
 	return nil, false
 }
 
+// BFSFrom returns a map of all visited stations from a specific start station.
+func (n *Network) BFSFrom(station string) map[string]struct{} {
+	queue := []string{station}
+	visited := map[string]struct{}{station: {}}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		for _, conn := range n.Connections[curr] {
+			if _, found := visited[conn]; !found {
+				visited[conn] = struct{}{}
+				queue = append(queue, conn)
+			}
+		}
+	}
+
+	return visited
+}
+
 func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 	queue := []int{start}
 	visited := map[int]struct{}{start: {}}
@@ -68,7 +88,7 @@ func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 	return nil, false
 }
 
-func (n *Network) removeShortest(start, end string) ([][]string, bool) {
+func (n *Network) RemoveShortest(start, end string) ([][]string, bool) {
 	routes := make([][]string, 0)
 	network := copyNetwork(n) //copy so original network doesn't get modified, in case it's useful elsewhere
 

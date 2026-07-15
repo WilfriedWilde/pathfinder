@@ -60,9 +60,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	edgeNetwork := network.convertIntoFlow(config.startStation, config.endStation)
+	network.TrimNetwork(config.startStation, config.endStation)
 
-	repeatedBFSRoutes, found := network.removeShortest(config.startStation, config.endStation)
+	edgeNetwork := network.ConvertIntoFlow(config.startStation, config.endStation)
+
+	repeatedBFSRoutes, found := network.RemoveShortest(config.startStation, config.endStation)
 	if !found {
 		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
 	}

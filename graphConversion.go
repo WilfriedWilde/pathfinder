@@ -1,8 +1,19 @@
 package main
 
-import "maps"
+import (
+	"fmt"
+	"maps"
+)
 
-func (n *Network) convertIntoFlow(start, end string) FlowNetwork {
+// TrimNetwork reduces network size by removing all stations, and their corresponding connections, that are not part of any path from start to end.
+func (n *Network) TrimNetwork(start, end string) {
+	reachableFromStart := n.BFSFrom(start)
+	reachableFromEnd := n.BFSFrom(end)
+
+	fmt.Printf("from start: %+v\n\nfrom end: %+v\n", reachableFromStart, reachableFromEnd)
+}
+
+func (n *Network) ConvertIntoFlow(start, end string) FlowNetwork {
 	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge)}
 	index := 2
 	for station := range n.Connections {

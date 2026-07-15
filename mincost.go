@@ -15,7 +15,7 @@ func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
 
 	distance[start] = 0
 	// loop over all stations, act on the stations that have a known distance to start
-	for i := 0; i < len(distance)-1; i++ {
+	for range distance[:len(distance)-1] {
 		diff := false
 		// for every station
 		for station, edges := range f.Connections {
