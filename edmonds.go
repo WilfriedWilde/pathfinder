@@ -1,10 +1,10 @@
 package main
 
-func EK(f *FlowNetwork, start, end int) ([][][]string, int) {
+func (f *FlowNetwork) EK(start, end int) ([][][]string, int) {
 	ret := make([][][]string, 0)
 	flow := 0
 	for {
-		usedEdges, found := BFSFlow(f, start, end)
+		usedEdges, found := f.BFSFlow(start, end)
 		if !found {
 			break
 		}
@@ -20,7 +20,7 @@ func EK(f *FlowNetwork, start, end int) ([][][]string, int) {
 			}
 		}
 		flow++
-		ret = append(ret, ExtractPaths(f, flow, start, end))
+		ret = append(ret, f.ExtractPaths(flow, start, end))
 
 	}
 	if flow == 0 {
@@ -29,7 +29,7 @@ func EK(f *FlowNetwork, start, end int) ([][][]string, int) {
 	return ret, flow
 }
 
-func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
+func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
 
 	paths := make([][]string, 0)
 	path := make([]string, 0)
@@ -64,7 +64,7 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 	return paths
 }
 
-func BFSFlow(f *FlowNetwork, start, end int) ([]int, bool) {
+func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 	queue := []int{start}
 	visited := map[int]struct{}{start: {}}
 	parentMap := make([]int, len(f.IDToName))

@@ -41,7 +41,7 @@ func BFS(n *Network, start, end string) ([]string, bool) {
 	return nil, false
 }
 
-func removeShortest(n *Network, start, end string) ([][]string, bool) {
+func (n *Network) removeShortest(start, end string) ([][]string, bool) {
 	routes := make([][]string, 0)
 	network := copyNetwork(n) //copy so original network doesn't get modified, in case it's useful elsewhere
 

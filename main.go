@@ -59,17 +59,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	edgeNetwork := convertIntoFlow(&network, config.startStation, config.endStation)
 
-	repeatedBFSRoutes, found := removeShortest(&network, config.startStation, config.endStation)
+	edgeNetwork := network.convertIntoFlow(config.startStation, config.endStation)
+
+	repeatedBFSRoutes, found := network.removeShortest(config.startStation, config.endStation)
 	if !found {
 		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
 	}
 
 	copyFlowNetwork := edgeNetwork.DeepCopy()
-	mcmfRouteSets, _ := MCMF(copyFlowNetwork, edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
 
-	ekRouteSets, _ := EK(&edgeNetwork, edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
+	mcmfRouteSets, _ := copyFlowNetwork.MCMF(edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
+	ekRouteSets, _ := edgeNetwork.EK(edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
 
 	fastestMCMFRoutes := getFastestRouteSet(mcmfRouteSets, config.numTrains)
 	fastestEKRoutes := getFastestRouteSet(ekRouteSets, config.numTrains)

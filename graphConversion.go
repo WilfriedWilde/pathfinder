@@ -2,7 +2,7 @@ package main
 
 import "maps"
 
-func convertIntoFlow(n *Network, start, end string) FlowNetwork {
+func (n *Network) convertIntoFlow(start, end string) FlowNetwork {
 	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge)}
 	index := 2
 	for station := range n.Connections {
