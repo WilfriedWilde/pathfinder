@@ -29,6 +29,7 @@ type Edge struct {
 	Original bool
 	Rev      int
 	Cost     int
+	Level    int
 }
 
 type TrainRoute struct {

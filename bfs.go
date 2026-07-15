@@ -88,6 +88,10 @@ func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 	return nil, false
 }
 
+func (f *FlowNetwork) BFSLevelGraph(start, end int) ([]int, bool) {
+	return nil, false
+}
+
 func (n *Network) RemoveShortest(start, end string) ([][]string, bool) {
 	routes := make([][]string, 0)
 	network := copyNetwork(n) //copy so original network doesn't get modified, in case it's useful elsewhere
