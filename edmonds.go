@@ -1,10 +1,10 @@
 package main
 
-func (f *FlowNetwork) EK(start, end int) ([][][]string, int) {
+func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end int) ([]int, bool)) ([][][]string, int) {
 	ret := make([][][]string, 0)
 	flow := 0
 	for {
-		usedEdges, found := f.BFSFlow(start, end)
+		usedEdges, found := pathfinder(start, end)
 		if !found {
 			break
 		}
@@ -19,13 +19,15 @@ func (f *FlowNetwork) EK(start, end int) ([][][]string, int) {
 				}
 			}
 		}
+
 		flow++
 		ret = append(ret, f.ExtractPaths(flow, start, end))
-
 	}
+
 	if flow == 0 {
 		return nil, 0
 	}
+
 	return ret, flow
 }
 
@@ -35,7 +37,7 @@ func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
 	path := make([]string, 0)
 
 	modifiedIndexes := make([]int, 0)
-	for i := 0; i < flow; i++ {
+	for range flow {
 		curr := start
 		path = []string{}
 		for curr != end {
@@ -62,31 +64,4 @@ func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
 		f.Connections[start][edgeInd].Usable = false
 	}
 	return paths
-}
-
-func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
-	queue := []int{start}
-	visited := map[int]struct{}{start: {}}
-	parentMap := make([]int, len(f.IDToName))
-	for len(queue) > 0 {
-		curr := queue[0]
-		queue = queue[1:]
-
-		if curr == end {
-			return parentMap, true
-		}
-
-		for _, edge := range f.Connections[curr] {
-			if _, found := visited[edge.To]; !found {
-				if edge.Usable {
-					visited[edge.To] = struct{}{}
-					parentMap[edge.To] = curr
-					queue = append(queue, edge.To)
-				}
-
-			}
-		}
-	}
-
-	return nil, false
 }

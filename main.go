@@ -69,18 +69,18 @@ func main() {
 
 	copyFlowNetwork := edgeNetwork.DeepCopy()
 
-	mcmfRouteSets, _ := copyFlowNetwork.MCMF(edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
-	ekRouteSets, _ := edgeNetwork.EK(edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation])
+	mcmfRouteSets, _ := copyFlowNetwork.GetRoutesSets(edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation], copyFlowNetwork.BFSFlow)
+	ekRouteSets, _ := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.startStation], edgeNetwork.NameToID[config.endStation], edgeNetwork.BellmanFord)
 
-	fastestMCMFRoutes := getFastestRouteSet(mcmfRouteSets, config.numTrains)
-	fastestEKRoutes := getFastestRouteSet(ekRouteSets, config.numTrains)
+	fastestMCMFRoutes := GetFastestRouteSet(mcmfRouteSets, config.numTrains)
+	fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.numTrains)
 
 	_, maxTurnsBFS := divert(repeatedBFSRoutes, config.numTrains)
 	_, maxTurnsEK := divert(fastestEKRoutes, config.numTrains)
 	trainRoutes, maxTurnsMCMF := divert(fastestMCMFRoutes, config.numTrains)
 
 	fmt.Println("------------------------------------------")
-	printTurns(trainRoutes, maxTurnsMCMF)
+	PrintTurns(trainRoutes, maxTurnsMCMF)
 	fmt.Println("------------------------------------------")
 
 	//createMap(network, RoutesUsed{config.startStation, config.endStation, fastestRoutes}, turnData, config.numTrains, true)

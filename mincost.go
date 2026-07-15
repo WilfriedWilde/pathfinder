@@ -4,38 +4,7 @@ import (
 	"math"
 )
 
-func (f *FlowNetwork) MCMF(start, end int) ([][][]string, int) {
-	ret := make([][][]string, 0)
-	flow := 0
-	for {
-		parents, found := f.bellmanFord(start, end)
-		if !found {
-			break
-		}
-
-		for node := end; node != start; node = parents[node] {
-			prev := parents[node]
-			for _, edge := range f.Connections[prev] {
-				if edge.To == node {
-					edge.Usable = false
-					f.Connections[node][edge.Rev].Usable = true
-					break
-				}
-			}
-		}
-
-		flow++
-		ret = append(ret, f.ExtractPaths(flow, start, end))
-	}
-
-	if flow == 0 {
-		return nil, 0
-	}
-
-	return ret, flow
-}
-
-func (f *FlowNetwork) bellmanFord(start, end int) ([]int, bool) {
+func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
 	distance := make([]int, len(f.IDToName)) // stationID is the index, value is the distance from start station to stationID
 	parents := make([]int, len(f.IDToName))  // stationID index, value stationID of the station from which the shortest path has been found
 
