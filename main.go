@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-type networks interface {
-	Network | FlowNetwork
-}
-
 type Station struct {
 	Name string
 	X, Y int
