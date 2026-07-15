@@ -1,9 +1,5 @@
 package main
 
-import (
-	"slices"
-)
-
 func EK(f *FlowNetwork, start, end int) ([][][]string, int) {
 	ret := make([][][]string, 0)
 	flow := 0
@@ -68,27 +64,15 @@ func ExtractPaths(f *FlowNetwork, flow, start, end int) [][]string {
 	return paths
 }
 
-func BFSFlow(f *FlowNetwork, start, end int) (map[int]int, bool) {
+func BFSFlow(f *FlowNetwork, start, end int) ([]int, bool) {
 	queue := []int{start}
 	visited := map[int]struct{}{start: {}}
-	parentMap := make(map[int]int)
+	parentMap := make([]int, len(f.IDToName))
 	for len(queue) > 0 {
 		curr := queue[0]
 		queue = queue[1:]
 
 		if curr == end {
-			route := make([]string, 0)
-
-			for node := end; ; node = parentMap[node] {
-				if !slices.Contains(route, f.IDToName[node]) {
-					route = append(route, f.IDToName[node])
-				}
-				if node == start {
-					break
-				}
-			}
-
-			slices.Reverse(route)
 			return parentMap, true
 		}
 
