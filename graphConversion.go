@@ -1,16 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"maps"
+	"slices"
 )
 
 // TrimNetwork reduces network size by removing all stations, and their corresponding connections, that are not part of any path from start to end.
 func (n *Network) TrimNetwork(start, end string) {
-	reachableFromStart := n.BFSFrom(start)
-	reachableFromEnd := n.BFSFrom(end)
+	relevantStations := n.BFSFrom(start)
 
-	fmt.Printf("from start: %+v\n\nfrom end: %+v\n", reachableFromStart, reachableFromEnd)
+	// nothing to trim, return
+	if len(n.Stations) == len(relevantStations) {
+		return
+	}
+
+	// modify original stations and connections by keeping only the relevant stations
+	for stationName := range n.Stations {
+		if _, found := relevantStations[stationName]; !found {
+			delete(n.Stations, stationName)
+		}
+	}
+
+	for stationName := range n.Connections {
+		if _, found := relevantStations[stationName]; !found {
+			delete(n.Connections, stationName)
+			continue
+		}
+
+		n.Connections[stationName] = slices.DeleteFunc(n.Connections[stationName], func(name string) bool {
+			_, found := relevantStations[name]
+			return !found
+		})
+	}
 }
 
 func (n *Network) ConvertIntoFlow(start, end string) FlowNetwork {
