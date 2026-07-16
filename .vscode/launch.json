@@ -18,7 +18,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["networks/1.txt", "waterloo", "st_pancras", "4"],
+            "args": ["networks/o-2.txt", "a_1", "a_4", "10"],
             "cwd": "${workspaceFolder}"
         }
     ]

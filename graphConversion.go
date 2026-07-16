@@ -7,11 +7,19 @@ import (
 
 // TrimNetwork reduces network size by removing all stations, and their corresponding connections, that are not part of any path from start to end.
 func (n *Network) TrimNetwork(start, end string) {
-	relevantStations := n.BFSFrom(start)
+	forward := n.BFSFrom(start, start, end)
+	backward := n.BFSFrom(end, start, end)
 
 	// nothing to trim, return
-	if len(n.Stations) == len(relevantStations) {
+	if len(forward) == len(backward) && len(forward) == len(n.Stations) {
 		return
+	}
+
+	relevantStations := make(map[string]struct{})
+	for station := range forward {
+		if _, found := backward[station]; found {
+			relevantStations[station] = struct{}{}
+		}
 	}
 
 	// modify original stations and connections by keeping only the relevant stations

@@ -11,8 +11,9 @@ func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end i
 
 		for node := end; node != start; node = usedEdges[node] {
 			next := usedEdges[node]
+
 			for _, edge := range f.Connections[next] {
-				if edge.To == node {
+				if edge.To == node && edge.Original {
 					edge.Usable = false
 					f.Connections[node][edge.Rev].Usable = true
 					break
@@ -32,17 +33,18 @@ func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end i
 }
 
 func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
-
 	paths := make([][]string, 0)
 	path := make([]string, 0)
-
 	modifiedIndexes := make([]int, 0)
+
 	for range flow {
 		curr := start
 		path = []string{}
+
 		for curr != end {
 			for ind, edge := range f.Connections[curr] {
 				if edge.Original && !edge.Usable {
+
 					if curr == start {
 						edge.Usable = true
 						modifiedIndexes = append(modifiedIndexes, ind)
@@ -56,12 +58,15 @@ func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
 				}
 			}
 		}
+
 		path = append(path, f.IDToName[end])
 		paths = append(paths, path)
 	}
+
 	// undo graph modifications
 	for _, edgeInd := range modifiedIndexes {
 		f.Connections[start][edgeInd].Usable = false
 	}
+
 	return paths
 }

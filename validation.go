@@ -16,17 +16,17 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 	}
 
 	// extract args
-	config.networkPath, config.startStation, config.endStation = args[1], args[2], args[3]
-	numTrainsStr := args[4]
+	config.NetworkPath, config.StartStation, config.EndStation = args[1], args[2], args[3]
+	NumTrainsStr := args[4]
 
 	// check if start station is the same as end station
-	if config.startStation == config.endStation {
+	if config.StartStation == config.EndStation {
 		return config, fmt.Errorf("Error: start and end stations should be different")
 	}
 
 	// check if number of train is valid positive integer
-	config.numTrains, err = strconv.Atoi(numTrainsStr)
-	if err != nil || config.numTrains < 1 {
+	config.NumTrains, err = strconv.Atoi(NumTrainsStr)
+	if err != nil || config.NumTrains < 1 {
 		return config, fmt.Errorf("Error: number of train should be positive integer")
 	}
 
@@ -42,7 +42,7 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 	coordinates := make(map[string]struct{})
 
 	// parse data from network map
-	file, err := os.Open(config.networkPath)
+	file, err := os.Open(config.NetworkPath)
 	if err != nil {
 		return Network{}, fmt.Errorf("Error opening file: %v", err.Error())
 	}
@@ -187,8 +187,8 @@ func validateNetwork(network Network, hasStationsSection, hasConnectionsSection 
 	}
 
 	// check if start and end stations exist
-	_, foundStart := network.Stations[config.startStation]
-	_, foundEnd := network.Stations[config.endStation]
+	_, foundStart := network.Stations[config.StartStation]
+	_, foundEnd := network.Stations[config.EndStation]
 
 	if !foundStart {
 		return fmt.Errorf("Error: start station does not exist")
