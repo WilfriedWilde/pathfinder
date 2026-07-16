@@ -41,7 +41,62 @@ func BFS(n *Network, start, end string) ([]string, bool) {
 	return nil, false
 }
 
-func removeShortest(n *Network, start, end string) ([][]string, bool) {
+// BFSFrom returns a map of all visited stations from a specific start station.
+func (n *Network) BFSFrom(station, start, end string) map[string]struct{} {
+	queue := []string{station}
+	visited := map[string]struct{}{station: {}}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		if station == start && curr == end {
+			visited[end] = struct{}{}
+			continue
+		} else if station == end && curr == start {
+			visited[start] = struct{}{}
+			continue
+		}
+
+		for _, conn := range n.Connections[curr] {
+			if _, found := visited[conn]; !found {
+				visited[conn] = struct{}{}
+				queue = append(queue, conn)
+			}
+		}
+	}
+
+	return visited
+}
+
+func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
+	queue := []int{start}
+	visited := map[int]struct{}{start: {}}
+	parentMap := make([]int, len(f.IDToName))
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		if curr == end {
+			return parentMap, true
+		}
+
+		for _, edge := range f.Connections[curr] {
+			if _, found := visited[edge.To]; !found {
+				if edge.Usable {
+					visited[edge.To] = struct{}{}
+					parentMap[edge.To] = curr
+					queue = append(queue, edge.To)
+				}
+
+			}
+		}
+	}
+
+	return nil, false
+}
+
+func (n *Network) RemoveShortest(start, end string) ([][]string, bool) {
 	routes := make([][]string, 0)
 	network := copyNetwork(n) //copy so original network doesn't get modified, in case it's useful elsewhere
 

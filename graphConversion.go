@@ -1,8 +1,48 @@
 package main
 
-import "maps"
+import (
+	"maps"
+	"slices"
+)
 
-func convertIntoFlow(n *Network, start, end string) FlowNetwork {
+// TrimNetwork reduces network size by removing all stations, and their corresponding connections, that are not part of any path from start to end.
+func (n *Network) TrimNetwork(start, end string) {
+	forward := n.BFSFrom(start, start, end)
+	backward := n.BFSFrom(end, start, end)
+
+	// nothing to trim, return
+	if len(forward) == len(backward) && len(forward) == len(n.Stations) {
+		return
+	}
+
+	relevantStations := make(map[string]struct{})
+	for station := range forward {
+		if _, found := backward[station]; found {
+			relevantStations[station] = struct{}{}
+		}
+	}
+
+	// modify original stations and connections by keeping only the relevant stations
+	for stationName := range n.Stations {
+		if _, found := relevantStations[stationName]; !found {
+			delete(n.Stations, stationName)
+		}
+	}
+
+	for stationName := range n.Connections {
+		if _, found := relevantStations[stationName]; !found {
+			delete(n.Connections, stationName)
+			continue
+		}
+
+		n.Connections[stationName] = slices.DeleteFunc(n.Connections[stationName], func(name string) bool {
+			_, found := relevantStations[name]
+			return !found
+		})
+	}
+}
+
+func (n *Network) ConvertIntoFlow(start, end string) FlowNetwork {
 	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge)}
 	index := 2
 	for station := range n.Connections {
