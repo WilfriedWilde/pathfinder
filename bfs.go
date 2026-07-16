@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"maps"
 	"slices"
 )
@@ -64,20 +65,21 @@ func (n *Network) BFSFrom(station string) map[string]struct{} {
 func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 	queue := []int{start}
 	visited := map[int]struct{}{start: {}}
-	parentMap := make([]int, len(f.IDToName))
+	parents := make([]int, len(f.IDToName))
+
 	for len(queue) > 0 {
 		curr := queue[0]
 		queue = queue[1:]
 
 		if curr == end {
-			return parentMap, true
+			return parents, true
 		}
 
 		for _, edge := range f.Connections[curr] {
 			if _, found := visited[edge.To]; !found {
 				if edge.Usable {
 					visited[edge.To] = struct{}{}
-					parentMap[edge.To] = curr
+					parents[edge.To] = curr
 					queue = append(queue, edge.To)
 				}
 
@@ -88,8 +90,27 @@ func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 	return nil, false
 }
 
-func (f *FlowNetwork) BFSLevelGraph(start, end int) ([]int, bool) {
-	return nil, false
+func (f *FlowNetwork) BFSLevel(start, end int) bool {
+	queue := []int{start}
+	f.Levels[start] = 0
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		for _, edge := range f.Connections[curr] {
+			if _, found := f.Levels[edge.To]; !found && edge.Usable {
+				f.Levels[edge.To] = f.Levels[curr] + 1
+				queue = append(queue, edge.To)
+			}
+		}
+	}
+
+	for station, level := range f.Levels {
+		fmt.Printf("station %d has level %d\n", station, level)
+	}
+
+	return false
 }
 
 func (n *Network) RemoveShortest(start, end string) ([][]string, bool) {

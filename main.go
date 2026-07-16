@@ -21,6 +21,7 @@ type FlowNetwork struct {
 	IDToName    map[int]string
 	NameToID    map[string]int
 	Connections map[int][]*Edge
+	Levels      map[int]int
 }
 
 type Edge struct {
@@ -65,6 +66,9 @@ func main() {
 	if !found {
 		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
 	}
+
+	LevelNetwork := edgeNetwork.DeepCopy()
+	LevelNetwork.Dinic(LevelNetwork.NameToID[config.startStation], LevelNetwork.NameToID[config.endStation])
 
 	copyFlowNetwork := edgeNetwork.DeepCopy()
 
