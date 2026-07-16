@@ -43,7 +43,7 @@ func (n *Network) TrimNetwork(start, end string) {
 }
 
 func (n *Network) ConvertIntoFlow(start, end string) FlowNetwork {
-	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge)}
+	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge), make(map[int]int), make(map[int]int)}
 	index := 2
 	for station := range n.Connections {
 		if station == start { // don't split start or end
@@ -101,6 +101,8 @@ func (f *FlowNetwork) DeepCopy() *FlowNetwork {
 		IDToName:    make(map[int]string, len(f.IDToName)),
 		NameToID:    make(map[string]int, len(f.NameToID)),
 		Connections: make(map[int][]*Edge, len(f.Connections)),
+		Levels:      make(map[int]int, len(f.NameToID)),
+		StartEdges:  make(map[int]int, len(f.NameToID)),
 	}
 
 	maps.Copy(copy.IDToName, f.IDToName)
