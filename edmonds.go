@@ -46,9 +46,11 @@ func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
 	for range flow {
 		curr := start
 		path = []string{}
+
 		for curr != end {
 			for ind, edge := range f.Connections[curr] {
 				if edge.Original && !edge.Usable {
+
 					if curr == start {
 						edge.Usable = true
 						modifiedIndexes = append(modifiedIndexes, ind)
@@ -62,12 +64,15 @@ func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
 				}
 			}
 		}
+
 		path = append(path, f.IDToName[end])
 		paths = append(paths, path)
 	}
+
 	// undo graph modifications
 	for _, edgeInd := range modifiedIndexes {
 		f.Connections[start][edgeInd].Usable = false
 	}
+
 	return paths
 }

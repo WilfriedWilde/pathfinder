@@ -13,10 +13,10 @@ func TestGetAndValidateUserInput(t *testing.T) {
 		"Vkhhliih": {
 			input: []string{"", "", "", "", ""},
 			output: Config{
-				networkPath:  "",
-				startStation: "",
-				endStation:   "",
-				numTrains:    0,
+				NetworkPath:  "",
+				StartStation: "",
+				EndStation:   "",
+				NumTrains:    0,
 			},
 		},
 	}

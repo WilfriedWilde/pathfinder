@@ -42,13 +42,21 @@ func BFS(n *Network, start, end string) ([]string, bool) {
 }
 
 // BFSFrom returns a map of all visited stations from a specific start station.
-func (n *Network) BFSFrom(station string) map[string]struct{} {
+func (n *Network) BFSFrom(station, start, end string) map[string]struct{} {
 	queue := []string{station}
 	visited := map[string]struct{}{station: {}}
 
 	for len(queue) > 0 {
 		curr := queue[0]
 		queue = queue[1:]
+
+		if station == start && curr == end {
+			visited[end] = struct{}{}
+			continue
+		} else if station == end && curr == start {
+			visited[start] = struct{}{}
+			continue
+		}
 
 		for _, conn := range n.Connections[curr] {
 			if _, found := visited[conn]; !found {
