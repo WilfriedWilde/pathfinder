@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"maps"
 	"slices"
 )
@@ -92,7 +91,7 @@ func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 
 func (f *FlowNetwork) BFSLevel(start, end int) bool {
 	queue := []int{start}
-	f.Levels = make(map[int]int, len(f.NameToID))
+	clear(f.Levels)
 	f.Levels[start] = 0
 
 	for len(queue) > 0 {
@@ -105,10 +104,6 @@ func (f *FlowNetwork) BFSLevel(start, end int) bool {
 				queue = append(queue, edge.To)
 			}
 		}
-	}
-
-	for station, level := range f.Levels {
-		fmt.Printf("station %d has level %d\n", station, level)
 	}
 
 	_, found := f.Levels[end]

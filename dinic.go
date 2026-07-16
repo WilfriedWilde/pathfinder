@@ -1,21 +1,57 @@
 package main
 
-import "fmt"
+import (
+	"time"
+)
 
-func (f *FlowNetwork) Dinic(start, end int) ([][][]string, bool) {
+func (f *FlowNetwork) Dinic(start, end int) ([][][]string, int, time.Duration) {
+	now := time.Now()
+
+	routesSets := make([][][]string, 0)
 	flow := 0
 
 	for f.BFSLevel(start, end) {
-		fmt.Println("inside BFS loop")
+		clear(f.StartEdges)
+
 		for f.DFSBlockingFlow(start, end) {
 			flow++
+			routesSets = append(routesSets, f.ExtractPaths(flow, start, end))
 		}
 	}
 
-	fmt.Println(flow)
-	return nil, false
+	if flow == 0 {
+		return nil, 0, 0
+	}
+
+	return routesSets, flow, time.Since(now)
 }
 
+func (f *FlowNetwork) DFSBlockingFlow(start, end int) bool {
+	if start == end {
+		return true
+	}
+
+	startEdge := f.StartEdges[start]
+
+	for edgeID, edge := range f.Connections[start][startEdge:] {
+		f.StartEdges[start] = edgeID + startEdge
+
+		if edge.Usable && f.Levels[start]+1 == f.Levels[edge.To] {
+			if f.DFSBlockingFlow(edge.To, end) {
+				edge.Usable = false
+				f.Connections[edge.To][edge.Rev].Usable = true
+
+				return true
+			}
+		}
+	}
+
+	f.Levels[start] = -1
+
+	return false
+}
+
+/*
 func (f *FlowNetwork) DFSBlockingFlow(start, end int) bool {
 	queue := []int{start}
 	parents := make([]int, len(f.IDToName))
@@ -30,7 +66,7 @@ func (f *FlowNetwork) DFSBlockingFlow(start, end int) bool {
 				prev := parents[station]
 
 				for _, edge := range f.Connections[prev] {
-					if edge.To == station {
+					if edge.To == station && edge.Original {
 						edge.Usable = false
 						f.Connections[station][edge.Rev].Usable = true
 						break
@@ -53,3 +89,4 @@ func (f *FlowNetwork) DFSBlockingFlow(start, end int) bool {
 
 	return false
 }
+*/

@@ -1,8 +1,15 @@
 package main
 
-func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end int) ([]int, bool)) ([][][]string, int) {
+import (
+	"time"
+)
+
+func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end int) ([]int, bool)) ([][][]string, int, time.Duration) {
+	now := time.Now()
+
 	routesSets := make([][][]string, 0)
 	flow := 0
+
 	for {
 		usedEdges, found := pathfinder(start, end)
 		if !found {
@@ -12,7 +19,7 @@ func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end i
 		for station := end; station != start; station = usedEdges[station] {
 			prev := usedEdges[station]
 			for _, edge := range f.Connections[prev] {
-				if edge.To == station {
+				if edge.To == station && edge.Original {
 					edge.Usable = false
 					f.Connections[station][edge.Rev].Usable = true
 					break
@@ -25,18 +32,17 @@ func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end i
 	}
 
 	if flow == 0 {
-		return nil, 0
+		return nil, 0, 0
 	}
 
-	return routesSets, flow
+	return routesSets, flow, time.Since(now)
 }
 
 func (f *FlowNetwork) ExtractPaths(flow, start, end int) [][]string {
-
 	paths := make([][]string, 0)
 	path := make([]string, 0)
-
 	modifiedIndexes := make([]int, 0)
+
 	for range flow {
 		curr := start
 		path = []string{}
