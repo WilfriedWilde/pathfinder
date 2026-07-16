@@ -92,6 +92,7 @@ func (f *FlowNetwork) BFSFlow(start, end int) ([]int, bool) {
 
 func (f *FlowNetwork) BFSLevel(start, end int) bool {
 	queue := []int{start}
+	f.Levels = make(map[int]int, len(f.NameToID))
 	f.Levels[start] = 0
 
 	for len(queue) > 0 {
@@ -110,7 +111,8 @@ func (f *FlowNetwork) BFSLevel(start, end int) bool {
 		fmt.Printf("station %d has level %d\n", station, level)
 	}
 
-	return false
+	_, found := f.Levels[end]
+	return found
 }
 
 func (n *Network) RemoveShortest(start, end string) ([][]string, bool) {

@@ -21,12 +21,23 @@ func (f *FlowNetwork) DFSBlockingFlow(start, end int) bool {
 	parents := make([]int, len(f.IDToName))
 
 	for len(queue) > 0 {
-		fmt.Println("inside DFS loop")
 		curr := queue[len(queue)-1]
 		queue = queue[:len(queue)-1]
 
 		if curr == end {
-			fmt.Printf("parents: %+v\n", parents)
+			// swap edges usability only if path was successfully found
+			for station := end; station != start; station = parents[station] {
+				prev := parents[station]
+
+				for _, edge := range f.Connections[prev] {
+					if edge.To == station {
+						edge.Usable = false
+						f.Connections[station][edge.Rev].Usable = true
+						break
+					}
+				}
+			}
+
 			return true
 		}
 
