@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	p "pathfinder/pathfinding"
 	"strconv"
 	"strings"
 )
 
-func PrintTurns(trainRoutes []TrainRoute, maxTurns int) ([]string, error) {
+func PrintTurns(trainRoutes []p.TrainRoute, maxTurns int) ([]string, error) {
 	if maxTurns == -1 {
 		return nil, fmt.Errorf("Something went wrong with pathfinding, no valid routes found.")
 	}

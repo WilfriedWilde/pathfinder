@@ -1,0 +1,36 @@
+#10 trains, 8 turn goal
+
+stations:
+start, 1, 1
+end, 2, 2
+middleshort1,3 ,3
+middleshort2,4 ,4
+bottomleft1,5,5
+bottomleft2,6,6
+bottomright1,7,7
+bottomright2,8,8
+topleft1,9,9
+topleft2,10,10
+topleft3,11,11
+topright1,12,12
+topright2,13,13
+topright3,14,14
+
+connections:
+start-middleshort1
+middleshort1-middleshort2
+middleshort2-end
+start-bottomleft1
+bottomleft1-bottomleft2
+bottomleft2-middleshort2
+middleshort1-bottomright1
+bottomright1-bottomright2
+bottomright2-end
+start-topleft1
+topleft1-topleft2
+topleft2-topleft3
+topleft3-middleshort1
+middleshort2-topright1
+topright1-topright2
+topright2-topright3
+topright3-end

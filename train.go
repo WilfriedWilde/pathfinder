@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
+	p "pathfinder/pathfinding"
 	"sort"
 )
 
-func divert(routes [][]string, trains int) ([]TrainRoute, int) {
+func divert(routes [][]string, trains int) ([]p.TrainRoute, int) {
 	fmt.Println(routes)
 	if len(routes) == 0 {
 		return nil, -1
 	}
-	trainRoutes := make([]TrainRoute, len(routes))
+	trainRoutes := make([]p.TrainRoute, len(routes))
 	for i, route := range routes {
-		trainRoutes[i] = TrainRoute{len(route) - 1, route[1:], 0}
+		trainRoutes[i] = p.TrainRoute{
+			RouteLength: len(route) - 1,
+			Route:       route[1:],
+			Trains:      0,
+		}
 	}
 
 	// sort once, so we only need to loop once going from smallest to largest
@@ -51,7 +56,7 @@ func divert(routes [][]string, trains int) ([]TrainRoute, int) {
 	return trainRoutes, trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1)
 }
 
-func distributeTrains(trains, groupSize int, trainRoutes []TrainRoute) {
+func distributeTrains(trains, groupSize int, trainRoutes []p.TrainRoute) {
 	increment := trains / groupSize
 	remainder := trains % groupSize
 
