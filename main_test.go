@@ -78,7 +78,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: station data corrupted",
+			err:    "Error line 4: station data corrupted",
 		},
 		"Too many fields in station data": {
 			input: Config{
@@ -88,7 +88,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: station data corrupted",
+			err:    "Error line 4: station data corrupted",
 		},
 		"Invalid station name": {
 			input: Config{
@@ -98,7 +98,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: station name not valid",
+			err:    "Error line 6: station name not valid",
 		},
 		"X coordinate is non numeric": {
 			input: Config{
@@ -108,7 +108,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: x coordinate for station waterloo is not a valid positive integer",
+			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"X coordinate is float": {
 			input: Config{
@@ -118,7 +118,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: x coordinate for station waterloo is not a valid positive integer",
+			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"X coordinate is negative": {
 			input: Config{
@@ -128,7 +128,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: x coordinate for station waterloo is not a valid positive integer",
+			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is non numeric": {
 			input: Config{
@@ -138,7 +138,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: y coordinate for station waterloo is not a valid positive integer",
+			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is float": {
 			input: Config{
@@ -148,7 +148,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: y coordinate for station waterloo is not a valid positive integer",
+			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is negative": {
 			input: Config{
@@ -158,17 +158,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: y coordinate for station waterloo is not a valid positive integer",
-		},
-		"Duplicated station name": {
-			input: Config{
-				NetworkPath:  "networks/testing/duplicate_stations.txt",
-				StartStation: "waterloo",
-				EndStation:   "euston",
-				NumTrains:    20,
-			},
-			output: Network{},
-			err:    "Error: station name waterloo is duplicated",
+			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Duplicated coordinates": {
 			input: Config{
@@ -178,7 +168,17 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: coordinates 3,1 are duplicated",
+			err:    "Error line 5: coordinates 3,1 are duplicated",
+		},
+		"Duplicated station name": {
+			input: Config{
+				NetworkPath:  "networks/testing/duplicate_stations.txt",
+				StartStation: "waterloo",
+				EndStation:   "euston",
+				NumTrains:    20,
+			},
+			output: Network{},
+			err:    "Error line 5: station name waterloo is duplicated",
 		},
 		"Too few fields in connection data": {
 			input: Config{
@@ -188,7 +188,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: connection data corrupted",
+			err:    "Error line 10: connection data corrupted",
 		},
 		"Too many fields in connection data": {
 			input: Config{
@@ -198,7 +198,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: connection data corrupted",
+			err:    "Error line 10: connection data corrupted",
 		},
 		"Invalid station name in connection": {
 			input: Config{
@@ -208,7 +208,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: station name not valid",
+			err:    "Error line 11: station name not valid",
 		},
 		"Duplicated connection AB": {
 			input: Config{
@@ -218,7 +218,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: a connection is already existing between waterloo and victoria",
+			err:    "Error line 11: a connection is already existing between waterloo and victoria",
 		},
 		"Duplicated connection BA": {
 			input: Config{
@@ -228,7 +228,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				NumTrains:    20,
 			},
 			output: Network{},
-			err:    "Error: a connection is already existing between victoria and waterloo",
+			err:    "Error line 11: a connection is already existing between victoria and waterloo",
 		},
 		"Valid output": {
 			input: Config{
