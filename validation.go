@@ -50,13 +50,15 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 
 	scanner := bufio.NewScanner(file)
 
+	var lineNumber int
 	var readingStations, readingConnections bool
 	var hasStationsSection, hasConnectionsSection bool
 
 	for scanner.Scan() {
+		lineNumber++
 		line := strings.TrimSpace(scanner.Text())
 		hashtagIndex := strings.Index(line, "#")
-
+		
 		if hashtagIndex != -1 {
 			line = strings.TrimSpace(line[:hashtagIndex])
 		}
@@ -80,7 +82,7 @@ func ParseAndValidateNetwork(config Config) (Network, error) {
 		if readingStations {
 			split := strings.Split(line, ",")
 			if len(split) != 3 {
-				return Network{}, fmt.Errorf("Error: station data corrupted\n")
+				return Network{}, fmt.Errorf("Error line %d: station data corrupted\n", lineNumber)
 
 			}
 
