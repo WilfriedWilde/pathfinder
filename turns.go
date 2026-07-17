@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-func PrintTurns(trainRoutes []TrainRoute, maxTurns int) []string {
+func PrintTurns(trainRoutes []TrainRoute, maxTurns int) ([]string, error) {
+	if maxTurns == -1 {
+		return nil, fmt.Errorf("Something went wrong with pathfinding, no valid routes found.")
+	}
 	turns := make([]strings.Builder, maxTurns)
 	turnCAP := 50
 	ret := make([]string, 0)
@@ -38,7 +41,7 @@ func PrintTurns(trainRoutes []TrainRoute, maxTurns int) []string {
 		}
 		fmt.Println(turn.String())
 	}
-	return ret
+	return ret, nil
 }
 
 func GetFastestRouteSet(routes [][][]string, trains int) [][]string {
