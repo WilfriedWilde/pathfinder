@@ -1,4 +1,5 @@
 #simplest example I could figure out that showcases the difference between Dijkstra and EK
+#starting from 4 trains, for all even train counts, EK will be one turn slower to complete
 #10 trains, 8 turn goal
 
 stations:
