@@ -19,9 +19,10 @@ func (f *FlowNetwork) GetRoutesSets(start, end int, pathfinder func(start, end i
 		for station := end; station != start; station = usedEdges[station] {
 			prev := usedEdges[station]
 			for _, edge := range f.Connections[prev] {
-				if edge.To == station && edge.Original {
+				if edge.To == station && edge.Usable {
 					edge.Usable = false
 					f.Connections[station][edge.Rev].Usable = true
+
 					break
 				}
 			}
