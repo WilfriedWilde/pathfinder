@@ -1,0 +1,30 @@
+#simplest example I could figure out that showcases the difference between Dijkstra and EK
+#10 trains, 8 turn goal
+
+stations:
+start, 1, 1
+end, 2, 2
+middle1,3 ,3
+middle2,4 ,4
+bottom1,5,5
+bottom2,6,6
+top1,7,7
+top2,8,8
+topleft1,9,9
+topleft2,10,10
+topleft3,11,11
+
+connections:
+start-topleft1
+topleft1-topleft2
+topleft2-topleft3
+topleft3-top1
+start-middle1
+middle1-middle2
+middle2-end
+start-bottom1
+bottom1-bottom2
+bottom2-middle2
+middle1-top1
+top1-top2
+top2-end
