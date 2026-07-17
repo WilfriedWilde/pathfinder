@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	p "pathfinder/pathfinding"
 	"reflect"
 	"testing"
 )
@@ -67,7 +68,7 @@ func TestGetAndValidateUserInput(t *testing.T) {
 func TestParseAndValidateNetwork(t *testing.T) {
 	tests := map[string]struct {
 		input  Config
-		output Network
+		output p.Network
 		err    string
 	}{
 		"Too few fields in station data": {
@@ -77,7 +78,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: station data corrupted",
 		},
 		"Too many fields in station data": {
@@ -87,7 +88,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: station data corrupted",
 		},
 		"Invalid station name": {
@@ -97,7 +98,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 6: station name not valid",
 		},
 		"X coordinate is non numeric": {
@@ -107,7 +108,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"X coordinate is float": {
@@ -117,7 +118,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"X coordinate is negative": {
@@ -127,7 +128,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is non numeric": {
@@ -137,7 +138,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is float": {
@@ -147,7 +148,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is negative": {
@@ -157,7 +158,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Duplicated coordinates": {
@@ -167,7 +168,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 5: coordinates 3,1 are duplicated",
 		},
 		"Duplicated station name": {
@@ -177,7 +178,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 5: station name waterloo is duplicated",
 		},
 		"Too few fields in connection data": {
@@ -187,7 +188,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 10: connection data corrupted",
 		},
 		"Too many fields in connection data": {
@@ -197,7 +198,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 10: connection data corrupted",
 		},
 		"Invalid station name in connection": {
@@ -207,7 +208,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 11: station name not valid",
 		},
 		"Duplicated connection AB": {
@@ -217,7 +218,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 11: a connection is already existing between waterloo and victoria",
 		},
 		"Duplicated connection BA": {
@@ -227,7 +228,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{},
+			output: p.Network{},
 			err:    "Error line 11: a connection is already existing between victoria and waterloo",
 		},
 		"Valid output": {
@@ -237,8 +238,8 @@ func TestParseAndValidateNetwork(t *testing.T) {
 				EndStation:   "euston",
 				NumTrains:    20,
 			},
-			output: Network{
-				Stations: map[string]Station{
+			output: p.Network{
+				Stations: map[string]p.Station{
 					"euston":     {Name: "euston", X: 11, Y: 23},
 					"st_pancras": {Name: "st_pancras", X: 5, Y: 15},
 					"victoria":   {Name: "victoria", X: 6, Y: 7},
@@ -272,15 +273,15 @@ func TestParseAndValidateNetwork(t *testing.T) {
 
 func TestValidateNetwork(t *testing.T) {
 	tests := map[string]struct {
-		network               Network
+		network               p.Network
 		hasStationsSection    bool
 		hasConnectionsSection bool
 		config                Config
 		output                string
 	}{
 		"Connection to unexisting station": {
-			network: Network{
-				Stations: map[string]Station{
+			network: p.Network{
+				Stations: map[string]p.Station{
 					"st_pancras": {Name: "st_pancras", X: 5, Y: 15},
 					"victoria":   {Name: "victoria", X: 6, Y: 7},
 					"waterloo":   {Name: "waterloo", X: 3, Y: 1},
@@ -303,8 +304,8 @@ func TestValidateNetwork(t *testing.T) {
 			output: "Error: connection made with unexisting station euston",
 		},
 		"No stations section": {
-			network: Network{
-				Stations: map[string]Station{
+			network: p.Network{
+				Stations: map[string]p.Station{
 					"waterloo": {"waterloo", 3, 1},
 					"victoria": {"victoria", 6, 7},
 				},
@@ -324,8 +325,8 @@ func TestValidateNetwork(t *testing.T) {
 			output: "Error: network map doesn't include a 'stations' section",
 		},
 		"No connections section": {
-			network: Network{
-				Stations: map[string]Station{
+			network: p.Network{
+				Stations: map[string]p.Station{
 					"waterloo": {"waterloo", 3, 1},
 					"victoria": {"victoria", 6, 7},
 				},
@@ -345,8 +346,8 @@ func TestValidateNetwork(t *testing.T) {
 			output: "Error: network map doesn't include a 'connections' section",
 		},
 		"Start section does not exist": {
-			network: Network{
-				Stations: map[string]Station{
+			network: p.Network{
+				Stations: map[string]p.Station{
 					"waterloo": {"waterloo", 3, 1},
 					"victoria": {"victoria", 6, 7},
 				},
@@ -366,8 +367,8 @@ func TestValidateNetwork(t *testing.T) {
 			output: "Error: start station does not exist",
 		},
 		"End section does not exist": {
-			network: Network{
-				Stations: map[string]Station{
+			network: p.Network{
+				Stations: map[string]p.Station{
 					"waterloo": {"waterloo", 3, 1},
 					"victoria": {"victoria", 6, 7},
 				},
@@ -387,13 +388,13 @@ func TestValidateNetwork(t *testing.T) {
 			output: "Error: end station does not exist",
 		},
 		"More than 10000 stations": {
-			network: Network{
-				Stations: func() map[string]Station {
-					stations := make(map[string]Station, 10003)
-					stations["victoria"] = Station{}
-					stations["waterloo"] = Station{}
+			network: p.Network{
+				Stations: func() map[string]p.Station {
+					stations := make(map[string]p.Station, 10003)
+					stations["victoria"] = p.Station{}
+					stations["waterloo"] = p.Station{}
 					for i := range 10001 {
-						stations[fmt.Sprintf("%d", i)] = Station{}
+						stations[fmt.Sprintf("%d", i)] = p.Station{}
 					}
 					return stations
 				}(),
@@ -413,8 +414,8 @@ func TestValidateNetwork(t *testing.T) {
 			output: "Error: the network map can only contains up to 10000 stations",
 		},
 		"Valid": {
-			network: Network{
-				Stations: map[string]Station{
+			network: p.Network{
+				Stations: map[string]p.Station{
 					"waterloo": {"waterloo", 3, 1},
 					"victoria": {"victoria", 6, 7},
 				},
@@ -452,15 +453,15 @@ func TestValidateNetwork(t *testing.T) {
 
 func TestBFS(t *testing.T) {
 	tests := map[string]struct {
-		network *Network
+		network *p.Network
 		start   string
 		end     string
 		output  []string
 		found   bool
 	}{
 		"Not found": {
-			network: &Network{
-				Stations: map[string]Station{
+			network: &p.Network{
+				Stations: map[string]p.Station{
 					"euston":     {Name: "euston", X: 11, Y: 23},
 					"st_pancras": {Name: "st_pancras", X: 5, Y: 15},
 					"victoria":   {Name: "victoria", X: 6, Y: 7},
@@ -483,7 +484,7 @@ func TestBFS(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			result, found := BFS(test.network, test.start, test.end)
+			result, found := p.BFS(test.network, test.start, test.end)
 			if !reflect.DeepEqual(result, test.output) || found != test.found {
 				t.Errorf("got: %+v %v, expected: %+v %v", result, found, test.output, test.found)
 			}
