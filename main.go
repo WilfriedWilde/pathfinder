@@ -50,7 +50,7 @@ type Config struct {
 
 func main() {
 	now := time.Now()
-	config, err := GetAndValidateUserInput(os.Args)
+	config, err := GetAndValidateUserInput(os.Args[1:])
 	if err != nil {
 		log.Fatal(err)
 	}
