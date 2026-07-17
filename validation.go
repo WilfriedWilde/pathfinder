@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// GetAndValidateUserInput returns a config file with the arguments parsed into
 func GetAndValidateUserInput(args []string) (config Config, err error) {
 	// check number command-line arguments
 	if len(args) < 4 {
@@ -34,6 +35,7 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 	return
 }
 
+// ParseAndValidateNetwork builds and returns the basic (non-split) network
 func ParseAndValidateNetwork(config Config) (p.Network, error) {
 	network := p.Network{
 		Stations:    make(map[string]p.Station),
@@ -172,6 +174,7 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 	return network, nil
 }
 
+// ValidateNetwork returns an error specifying why the network is invalid, if it is.
 func ValidateNetwork(network p.Network, hasStationsSection, hasConnectionsSection bool, config Config) error {
 	// check if connections are made with valid stations
 	for stationName := range network.Connections {
@@ -204,6 +207,10 @@ func ValidateNetwork(network p.Network, hasStationsSection, hasConnectionsSectio
 	// check max number stations
 	if len(network.Stations) > 10000 {
 		return fmt.Errorf("Error: the network map can only contains up to 10000 stations")
+	}
+
+	if _, found := p.BFS(&network, config.StartStation, config.EndStation); !found {
+		return fmt.Errorf("Error: No paths found between starting and ending stations")
 	}
 
 	return nil

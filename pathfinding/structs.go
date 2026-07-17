@@ -16,7 +16,7 @@ type FlowNetwork struct {
 	Connections map[int][]*Edge
 	Levels      map[int]int // For each station, stores its level (distance from the start to this station in number of stations) - Used in BFS level
 	StartEdges  map[int]int // For each station, stores the start edge index - Used in the DFS blocking flow
-	Potential   []int
+	Potential   []int       // Used for Dijkstra implementation
 }
 
 type Edge struct {
@@ -24,19 +24,12 @@ type Edge struct {
 	Usable   bool
 	Original bool
 	Rev      int
-	Cost     int
-	Level    int
+	Cost     int // For Bellman-Ford and Dijkstra
+	Level    int // Used for Dinic
 }
 
 type TrainRoute struct {
 	RouteLength int
 	Route       []string
 	Trains      int
-}
-
-type Config struct {
-	NetworkPath  string
-	StartStation string
-	EndStation   string
-	NumTrains    int
 }

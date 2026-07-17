@@ -70,6 +70,9 @@ func (n *Network) BFSFrom(station, start, end string) map[string]struct{} {
 	return visited
 }
 
+// ConvertIntoFlow returns the input graph with all the stations split and Edges created
+//
+// Needed to enforce the station capacity limit to one
 func (n *Network) ConvertIntoFlow(start, end string) FlowNetwork {
 	f := FlowNetwork{make(map[int]string), make(map[string]int), make(map[int][]*Edge), make(map[int]int), make(map[int]int), make([]int, len(n.Connections))}
 	index := 2
@@ -105,7 +108,6 @@ func (n *Network) ConvertIntoFlow(start, end string) FlowNetwork {
 
 // add forward edge and reverse edge at the same time, so the indices are correct
 // not splitting the original connection, but redirecting it and then adding a reverse edge
-// reverse edge only used for potential backtracking? never for main pathfinding?
 func addEdge(edgeMap map[int][]*Edge, from, to, cost int) {
 	edgeMap[from] = append(edgeMap[from], &Edge{
 		To:       to,
@@ -124,6 +126,7 @@ func addEdge(edgeMap map[int][]*Edge, from, to, cost int) {
 	})
 }
 
+// CopyFlowNetwork returns a deep copy of the input map, so multiple pathfinding algorithms can be ran without interference
 func (f *FlowNetwork) CopyFlowNetwork() *FlowNetwork {
 	copy := &FlowNetwork{
 		IDToName:    make(map[int]string, len(f.IDToName)),
@@ -151,7 +154,8 @@ func (f *FlowNetwork) CopyFlowNetwork() *FlowNetwork {
 	return copy
 }
 
-func copyNetwork(n *Network) *Network {
+// CopyNetwork returns a deep copy of the original network, so the original one stays intact for visualization purposes
+func (n *Network) CopyNetwork() *Network {
 	network := &Network{make(map[string]Station), make(map[string][]string)}
 
 	maps.Copy(network.Stations, n.Stations)

@@ -2,14 +2,19 @@ package pathfinding
 
 import (
 	"slices"
+	"time"
 )
 
-func (n *Network) GreedyBFS(start, end string) ([][]string, bool) {
+// GreedyBFS returns a set of distinct, non-overlapping routes
+//
+// It repeatedly runs BFS and removes the non-terminal stations from the graph
+func (n *Network) GreedyBFS(start, end string) ([][]string, bool, time.Duration) {
+	nCopy := n.CopyNetwork()
+	now := time.Now()
 	routes := make([][]string, 0)
-	network := copyNetwork(n) //copy so original network doesn't get modified, in case it's useful elsewhere
 
 	for { //keep running BFS, removing middle stations (and start-end connection specifically if that's found) until no more paths exist
-		route, found := BFS(network, start, end)
+		route, found := BFS(nCopy, start, end)
 		if found == false {
 			break
 		}
@@ -19,14 +24,14 @@ func (n *Network) GreedyBFS(start, end string) ([][]string, bool) {
 		if len(route) == 2 { //has to be start-end
 			ind := 0
 
-			for i, v := range network.Connections[start] {
+			for i, v := range nCopy.Connections[start] {
 				if v == end {
 					ind = i
 					break
 				}
 			}
 
-			network.Connections[start] = append(network.Connections[start][:ind], network.Connections[start][ind+1:]...)
+			nCopy.Connections[start] = append(nCopy.Connections[start][:ind], nCopy.Connections[start][ind+1:]...)
 
 		}
 
@@ -39,7 +44,7 @@ func (n *Network) GreedyBFS(start, end string) ([][]string, bool) {
 		}
 
 		// loop over all station[connections], compare against ones used in route, build a new []connection without the used conns
-		for stationName, connections := range network.Connections {
+		for stationName, connections := range nCopy.Connections {
 			filtered := make([]string, 0)
 
 			for _, conn := range connections {
@@ -48,17 +53,18 @@ func (n *Network) GreedyBFS(start, end string) ([][]string, bool) {
 				}
 			}
 
-			network.Connections[stationName] = filtered
+			nCopy.Connections[stationName] = filtered
 		}
 	}
 
 	if len(routes) == 0 {
-		return nil, false
+		return nil, false, 0
 	}
 
-	return routes, true
+	return routes, true, time.Since(now)
 }
 
+// BFS returns the route used, as well as if it found a route
 func BFS(n *Network, start, end string) ([]string, bool) {
 	queue := []string{start}
 	visited := map[string]struct{}{start: {}}

@@ -434,6 +434,32 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			output: "",
 		},
+		"Path not found": {
+			network: p.Network{
+				Stations: map[string]p.Station{
+					"euston":     {Name: "euston", X: 11, Y: 23},
+					"st_pancras": {Name: "st_pancras", X: 5, Y: 15},
+					"victoria":   {Name: "victoria", X: 6, Y: 7},
+					"waterloo":   {Name: "waterloo", X: 3, Y: 1},
+					"whatever":   {Name: "whatever", X: 3, Y: 2},
+				},
+				Connections: map[string][]string{
+					"euston":     {"waterloo", "st_pancras"},
+					"st_pancras": {"euston", "victoria"},
+					"victoria":   {"waterloo", "st_pancras"},
+					"waterloo":   {"victoria", "euston"},
+				},
+			},
+			hasStationsSection:    true,
+			hasConnectionsSection: true,
+			config: Config{
+				NetworkPath:  "networks/testing/whatever.txt",
+				StartStation: "waterloo",
+				EndStation:   "whatever",
+				NumTrains:    10,
+			},
+			output: "Error: No paths found between starting and ending stations",
+		},
 	}
 
 	for name, test := range tests {

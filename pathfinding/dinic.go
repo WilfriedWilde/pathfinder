@@ -4,18 +4,22 @@ import (
 	"time"
 )
 
+// Dinic returns a set of distinct, non-overlapping routes for each flow increment
+//
+// It runs BFS once to set levels for each station and run DFS as many times as it finds a valid path
 func (f *FlowNetwork) Dinic(start, end int) ([][][]string, int, time.Duration) {
+	fCopy := f.CopyFlowNetwork()
 	now := time.Now()
 
 	routesSets := make([][][]string, 0)
 	flow := 0
 
-	for f.BFSLevel(start, end) {
-		clear(f.StartEdges)
+	for fCopy.BFSLevel(start, end) {
+		clear(fCopy.StartEdges)
 
-		for f.DFSBlockingFlow(start, end) {
+		for fCopy.DFSBlockingFlow(start, end) {
 			flow++
-			routesSets = append(routesSets, f.ExtractPaths(flow, start, end))
+			routesSets = append(routesSets, fCopy.ExtractPaths(flow, start, end))
 		}
 	}
 
@@ -26,6 +30,7 @@ func (f *FlowNetwork) Dinic(start, end int) ([][][]string, int, time.Duration) {
 	return routesSets, flow, time.Since(now)
 }
 
+// BFSLevel returns true if a path was found (i.e. if end station level was ever updated)
 func (f *FlowNetwork) BFSLevel(start, end int) bool {
 	queue := []int{start}
 	clear(f.Levels)
@@ -47,6 +52,9 @@ func (f *FlowNetwork) BFSLevel(start, end int) bool {
 	return found
 }
 
+// DFSBlockingFlow returns true if a path was found
+//
+// It checks recursively from the start station if it's possible to access a new station that satisfies: nextLevel = startLevel + 1
 func (f *FlowNetwork) DFSBlockingFlow(start, end int) bool {
 	if start == end {
 		return true

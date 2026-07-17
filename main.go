@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	p "pathfinder/pathfinding"
 	"time"
 )
 
@@ -30,25 +31,24 @@ func main() {
 
 	edgeNetwork := network.ConvertIntoFlow(config.StartStation, config.EndStation)
 
-	repeatedBFSRoutes, found := network.GreedyBFS(config.StartStation, config.EndStation)
-	if !found {
-		log.Fatal(fmt.Errorf("No paths found between starting and ending stations."))
-	}
+	repeatedBFSRoutes, _, bfsTime := network.GreedyBFS(config.StartStation, config.EndStation)
 
-	ekNetwork := edgeNetwork.CopyFlowNetwork()
-	dinicNetwork := edgeNetwork.CopyFlowNetwork()
-	mcmfNetwork := edgeNetwork.CopyFlowNetwork()
-	dijkstraNetwork := edgeNetwork.CopyFlowNetwork()
-
-	ekRouteSets, _, ekTime := ekNetwork.GetRoutesSets(ekNetwork.NameToID[config.StartStation], ekNetwork.NameToID[config.EndStation], ekNetwork.BFSFlow)
-	//mcmfRouteSets, _, bellFordTime := mcmfNetwork.GetRoutesSets(mcmfNetwork.NameToID[config.StartStation], mcmfNetwork.NameToID[config.EndStation], mcmfNetwork.BellmanFord)
-	dinicRouteSets, _, dinicTime := dinicNetwork.Dinic(dinicNetwork.NameToID[config.StartStation], dinicNetwork.NameToID[config.EndStation])
-	dijkstraRouteSets, _, dijkstraTime := dijkstraNetwork.GetRoutesSets(mcmfNetwork.NameToID[config.StartStation], mcmfNetwork.NameToID[config.EndStation], dijkstraNetwork.Dijkstra)
+	ekRouteSets, _, ekTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.BFSFlow)
+	//mcmfRouteSets, _, bellFordTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.BellmanFord)
+	dinicRouteSets, _, dinicTime := edgeNetwork.Dinic(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation])
+	dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.Dijkstra)
 
 	fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.NumTrains)
 	//fastestMCMFRoutes := GetFastestRouteSet(mcmfRouteSets, config.NumTrains)
 	fastestDinicRoutes := GetFastestRouteSet(dinicRouteSets, config.NumTrains)
 	fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
+	for i, v := range fastestDinicRoutes {
+		fmt.Printf("flow %d: paths: %+v", i, v)
+	}
+	fmt.Println("dijkstra:")
+	for i, v := range fastestDijkstraRoutes {
+		fmt.Printf("flow %d: paths: %+v", i, v)
+	}
 
 	_, maxTurnsBFS := divert(repeatedBFSRoutes, config.NumTrains)
 	_, maxTurnsEK := divert(fastestEKRoutes, config.NumTrains)
@@ -73,6 +73,7 @@ func main() {
 	//fmt.Println("Bellford: ", maxTurnsMCMF)
 	fmt.Println("Dijkstra: ", maxTurnsDijkstra)
 	fmt.Println("Dinic: ", maxTurnsDinic)
+	fmt.Println("BFS Remove: ", bfsTime)
 	fmt.Println("Edmonds-Karp time: ", ekTime)
 	//fmt.Println("Bellman-Ford time: ", bellFordTime)
 	fmt.Println("Dinic time: ", dinicTime)

@@ -12,7 +12,8 @@ type Node struct {
 
 type PriorityQueue []Node
 
-func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
+// BellmanFord returns a slice where the index is the stationID and the value is its parent (station where the station of the given index can be reached in the least amount of actual distance)
+func BellmanFord(f *FlowNetwork, start, end int) ([]int, bool) {
 	distance := make([]int, len(f.IDToName)) // stationID is the index, value is the distance from start station to stationID
 	parents := make([]int, len(f.IDToName))  // stationID index, value stationID of the station from which the shortest path has been found
 
@@ -56,7 +57,12 @@ func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
 	return parents, true
 }
 
-func (f *FlowNetwork) Dijkstra(start, end int) ([]int, bool) {
+// Dijkstra returns a slice where the index is the stationID and the value is its parent (station where the station of the given index can be reached in the least amount of actual distance)
+//
+// # Compared to BFS, uses a priority queue instead, always popping the node which currently has the least distance stored into it
+//
+// Since Dijkstra cannot handle negative cost paths, Johnson's potentials are used to normalize the path costs to be positive, while retaining their relative cost differences
+func Dijkstra(f *FlowNetwork, start, end int) ([]int, bool) {
 	distance := make([]int, len(f.IDToName))
 	parents := make([]int, len(f.IDToName))
 	for i := range distance {
@@ -81,7 +87,6 @@ func (f *FlowNetwork) Dijkstra(start, end int) ([]int, bool) {
 				distance[edge.To] = distance[curr.ID] + cost
 				parents[edge.To] = curr.ID
 				heap.Push(prioQueue, Node{edge.To, distance[edge.To]})
-				//prioQueue.Push(Node{edge.To, distance[edge.To]})
 			}
 		}
 	}
@@ -96,6 +101,8 @@ func (f *FlowNetwork) Dijkstra(start, end int) ([]int, bool) {
 	}
 	return parents, true
 }
+
+// required for being able to implement a container/heap interface
 
 func (pq PriorityQueue) Len() int {
 	return len(pq)
