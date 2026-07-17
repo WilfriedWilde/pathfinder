@@ -23,6 +23,7 @@ type FlowNetwork struct {
 	Connections map[int][]*Edge
 	Levels      map[int]int // For each station, stores its level (distance from the start to this station in number of stations) - Used in BFS level
 	StartEdges  map[int]int // For each station, stores the start edge index - Used in the DFS blocking flow
+	Potential   []int
 }
 
 type Edge struct {
@@ -70,20 +71,24 @@ func main() {
 
 	ekNetwork := edgeNetwork.DeepCopy()
 	dinicNetwork := edgeNetwork.DeepCopy()
-	//mcmfNetwork := edgeNetwork.DeepCopy()
+	mcmfNetwork := edgeNetwork.DeepCopy()
+	dijkstraNetwork := edgeNetwork.DeepCopy()
 
 	ekRouteSets, _, ekTime := ekNetwork.GetRoutesSets(ekNetwork.NameToID[config.StartStation], ekNetwork.NameToID[config.EndStation], ekNetwork.BFSFlow)
 	//mcmfRouteSets, _, bellFordTime := mcmfNetwork.GetRoutesSets(mcmfNetwork.NameToID[config.StartStation], mcmfNetwork.NameToID[config.EndStation], mcmfNetwork.BellmanFord)
 	dinicRouteSets, _, dinicTime := dinicNetwork.Dinic(dinicNetwork.NameToID[config.StartStation], dinicNetwork.NameToID[config.EndStation])
+	dijkstraRouteSets, _, dijkstraTime := dijkstraNetwork.GetRoutesSets(mcmfNetwork.NameToID[config.StartStation], mcmfNetwork.NameToID[config.EndStation], dijkstraNetwork.Dijkstra)
 
 	fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.NumTrains)
 	//fastestMCMFRoutes := GetFastestRouteSet(mcmfRouteSets, config.NumTrains)
 	fastestDinicRoutes := GetFastestRouteSet(dinicRouteSets, config.NumTrains)
+	fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
 
 	_, maxTurnsBFS := divert(repeatedBFSRoutes, config.NumTrains)
 	_, maxTurnsEK := divert(fastestEKRoutes, config.NumTrains)
 	//trainRoutes, maxTurnsMCMF := divert(fastestMCMFRoutes, config.NumTrains)
 	_, maxTurnsDinic := divert(fastestDinicRoutes, config.NumTrains)
+	_, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
 
 	fmt.Println("------------------------------------------")
 	//PrintTurns(trainRoutes, maxTurnsMCMF)
@@ -92,12 +97,15 @@ func main() {
 	//createMap(network, RoutesUsed{config.StartStation, config.EndStation, fastestMCMFRoutes}, turnData, config.NumTrains, true)
 
 	timeTaken := time.Since(now)
-	fmt.Println(timeTaken)
+	fmt.Println("Total time: ", timeTaken)
+
 	fmt.Println("BFS Remove: ", maxTurnsBFS)
 	fmt.Println("Edmonds-Karp: ", maxTurnsEK)
-	//fmt.Println("MCMF: ", maxTurnsMCMF)
+	//fmt.Println("Bellford: ", maxTurnsMCMF)
+	fmt.Println("Dijkstra: ", maxTurnsDijkstra)
 	fmt.Println("Dinic: ", maxTurnsDinic)
 	fmt.Println("Edmonds-Karp time: ", ekTime)
 	//fmt.Println("Bellman-Ford time: ", bellFordTime)
 	fmt.Println("Dinic time: ", dinicTime)
+	fmt.Println("Dijkstra time: ", dijkstraTime)
 }

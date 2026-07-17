@@ -1,8 +1,16 @@
 package main
 
 import (
+	"container/heap"
 	"math"
 )
+
+type Node struct {
+	ID   int
+	Dist int
+}
+
+type PriorityQueue []Node
 
 func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
 	distance := make([]int, len(f.IDToName)) // stationID is the index, value is the distance from start station to stationID
@@ -19,6 +27,10 @@ func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
 		diff := false
 		// for every station
 		for station, edges := range f.Connections {
+			// skip stations that have not yet been connected into
+			if distance[station] == math.MaxInt32 {
+				continue
+			}
 			// check all edges and if station has known distance, add that distance + edge cost to the stations the edges connect to
 			for _, edge := range edges {
 				if distance[station] != math.MaxInt32 &&
@@ -42,4 +54,68 @@ func (f *FlowNetwork) BellmanFord(start, end int) ([]int, bool) {
 	}
 
 	return parents, true
+}
+
+func (f *FlowNetwork) Dijkstra(start, end int) ([]int, bool) {
+	distance := make([]int, len(f.IDToName))
+	parents := make([]int, len(f.IDToName))
+	for i := range distance {
+		distance[i] = math.MaxInt32
+		parents[i] = -1
+	}
+	distance[start] = 0
+	prioQueue := &PriorityQueue{}
+	heap.Init(prioQueue)
+	heap.Push(prioQueue, Node{start, 0})
+	for prioQueue.Len() != 0 {
+		curr := heap.Pop(prioQueue).(Node)
+		if curr.Dist != distance[curr.ID] {
+			continue
+		}
+		for _, edge := range f.Connections[curr.ID] {
+			if !edge.Usable {
+				continue
+			}
+			cost := edge.Cost + f.Potential[curr.ID] - f.Potential[edge.To]
+			if distance[curr.ID]+cost < distance[edge.To] {
+				distance[edge.To] = distance[curr.ID] + cost
+				parents[edge.To] = curr.ID
+				heap.Push(prioQueue, Node{edge.To, distance[edge.To]})
+				//prioQueue.Push(Node{edge.To, distance[edge.To]})
+			}
+		}
+	}
+
+	if distance[end] == math.MaxInt32 { // no path found
+		return nil, false
+	}
+	for i := range distance {
+		if distance[i] != math.MaxInt32 {
+			f.Potential[i] += distance[i]
+		}
+	}
+	return parents, true
+}
+
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].Dist < pq[j].Dist
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(x any) {
+	*pq = append(*pq, x.(Node))
+}
+
+func (pq *PriorityQueue) Pop() any {
+	n := len(*pq)
+	popped := (*pq)[n-1]
+	*pq = (*pq)[:n-1]
+	return popped
 }
