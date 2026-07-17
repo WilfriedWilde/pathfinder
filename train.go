@@ -1,10 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"sort"
 )
 
 func divert(routes [][]string, trains int) ([]TrainRoute, int) {
+	fmt.Println(routes)
+	if len(routes) == 0 {
+		return nil, -1
+	}
 	trainRoutes := make([]TrainRoute, len(routes))
 	for i, route := range routes {
 		trainRoutes[i] = TrainRoute{len(route) - 1, route[1:], 0}
