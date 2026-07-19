@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	p "pathfinder/pathfinding"
+	s "pathfinder/server"
 	"time"
 )
 
@@ -57,13 +58,16 @@ func main() {
 	trainRoutes, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
 
 	fmt.Println("------------------------------------------")
-	_, err = PrintTurns(trainRoutes, maxTurnsDijkstra)
+	turnData, err := PrintTurns(trainRoutes, maxTurnsDijkstra)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("------------------------------------------")
 
-	//createMap(network, RoutesUsed{config.StartStation, config.EndStation, fastestMCMFRoutes}, turnData, config.NumTrains, true)
+	err = s.CreateMap(network, s.RoutesUsed{config.StartStation, config.EndStation, fastestDijkstraRoutes}, turnData, config.NumTrains, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	timeTaken := time.Since(now)
 	fmt.Println("Total time: ", timeTaken)

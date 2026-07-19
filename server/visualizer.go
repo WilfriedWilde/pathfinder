@@ -1,9 +1,8 @@
-package main
+package server
 
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"os"
 	p "pathfinder/pathfinding"
 	"sort"
@@ -22,18 +21,30 @@ func sx(x, minX int, s float64) float64 {
 func sy(y, minY int, s float64) float64 {
 	return (float64(y - minY)) * s
 }
-
-func createMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) {
-	for _, v := range r.Routes {
-		v = v[1 : len(v)-1]
+func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
+	err := createSVG(n, r, trains)
+	if err != nil {
+		return err
 	}
+	err = createJSTurns(turnData)
+	if err != nil {
+		return err
+	}
+	startServer()
+	return nil
+}
+
+func createSVG(n p.Network, r RoutesUsed, trains int) error {
 	//create a [stationname] map that saves the color-to-be-used, empty if not part of found path
 	colorMap := make(map[string]string, 0)
 	colorMap[r.Start] = "green"
 	colorMap[r.End] = "red"
-	for _, v := range r.Routes {
-		for _, v2 := range v {
-			colorMap[v2] = "orange"
+	for _, route := range r.Routes {
+		for ind, routeStation := range route {
+			if ind == 0 || ind == len(route)-1 { // skip the already colored start/end stations
+				continue
+			}
+			colorMap[routeStation] = "orange"
 		}
 	}
 
@@ -61,7 +72,6 @@ func createMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels 
 	height := maxY - minY
 	canvas := 1000.0 //baseline that actual coordinates get scaled against
 	scale := canvas / float64(max(width, height))
-	//	extent := max(width, height)
 	radius := 6.0 / density * 10
 	radius = math.Max(radius, 0.15)
 	radius = math.Min(radius, 6.0)
@@ -72,54 +82,14 @@ func createMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels 
 	labelXOffset := 12.0 //offsets for showing text/trains without overlapping with actual station
 	labelYOffset := -7.0
 
-	f, err := os.Create("map2.html")
+	f, err := os.Create("output/map.svg")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 	defer f.Close()
 
-	fmt.Fprintln(f, `<!DOCTYPE html>`)
-	fmt.Fprintln(f, `<html>`)
-	fmt.Fprintln(f, `<body>`)
 	//generate viewbox with a buffer of 100 on every side compared to the svg map
 	fmt.Fprintf(f, `<svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="%d %d %d %d">`+"\n", -100, -100, 1200, 1200)
-
-	fmt.Fprintln(f, `<style>`)
-	//hide/show labels by default
-	if !labels {
-		fmt.Fprintln(f, `.station text {	display: none; }
-.station:hover text {display: block; }
-.train text {	display: none; }
-.train:hover text {display: block; }
-svg {
-	width: 100vw;
-	height: 100vh;
-	display: block;
-}`)
-	}
-	//if turns exist, css for turn buttons
-	if true {
-		fmt.Fprintln(f, `#controls {
-	position: fixed;
-	bottom: 20px;
-	left: 50%;
-	transform: translateX(-50%);
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	font-family: Arial, sans-serif;
-}
-#controls button {
-	font-size: 14px;
-	cursor: center;
-}
-#turnLabel {
-	min-width: 100px;
-	text-align: center;
-}`)
-	}
-	fmt.Fprintln(f, `</style>`)
 
 	//loop through all stations, loop through connected stations, check if connection has already been drawn, draw connection if not
 	usedConnection := make(map[string]struct{}, 0)
@@ -177,175 +147,19 @@ svg {
 	}
 
 	fmt.Fprintln(f, `</svg>`)
-	//controls for turns
-	fmt.Fprintf(f, `<div id="controls">
-	<button id="prev">Previous</button>
-	<span id="turnLabel"></span>
-	<button id="next">Next</button>
-</div>`)
-	//javascript
-	fmt.Fprintln(f, `
-<script>
-
-
-//viewbox panning/zooming
-const svg = document.getElementById("map");
-const viewBox = svg.viewBox.baseVal;
-
-let dragging = false;
-let lastX = 0;
-let lastY = 0;
-
-svg.addEventListener("wheel", e => {
-	e.preventDefault();
-	const rect = svg.getBoundingClientRect();
-	const mouseX = (e.clientX - rect.left) / rect.width;
-	const mouseY = (e.clientY - rect.top) / rect.height;
-	const oldWidth = viewBox.width;
-	const oldHeight = viewBox.height;
-	const factor = 1.2;
-
-	if (e.deltaY < 0) {
-		viewBox.width /= factor;
-		viewBox.height /= factor;
-	} else {
-		viewBox.width *= factor;
-		viewBox.height *= factor;
-	}
-
-	const widthDiff = oldWidth - viewBox.width;
-	const heightDiff = oldHeight - viewBox.height;
-
-	viewBox.x += widthDiff * mouseX;
-	viewBox.y += heightDiff * mouseY;
-});
-
-svg.addEventListener("mousedown", e => {
-	dragging = true;
-	lastX = e.clientX;
-	lastY = e.clientY;
-});
-
-window.addEventListener("mouseup", () => {
-	dragging = false;
-});
-
-window.addEventListener("mousemove", e => {
-
-	if (!dragging) {
-		return;
-	}
-
-	const dx = e.clientX - lastX;
-	const dy = e.clientY - lastY;
-
-	viewBox.x -= dx * (viewBox.width / svg.clientWidth);
-	viewBox.y -= dy * (viewBox.height / svg.clientHeight);
-
-	lastX = e.clientX;
-	lastY = e.clientY;
-});`)
-
-	//arrow key hotkeys for turns, convert turndata into js consts
-	if true {
-		fmt.Fprintf(f, `window.addEventListener("keydown", e => {
-	if (e.key === "ArrowLeft") {
-		e.preventDefault();
-		document.getElementById("prev").click();
-	} else if (e.key === "ArrowRight") {
-		e.preventDefault();
-		document.getElementById("next").click();
-	}
-});
-const turns = [
-`)
-		for _, v := range turnData {
-			fmt.Fprintf(f, "%q,\n", v)
-		}
-		fmt.Fprintln(f, `];`)
-		//update button state
-		fmt.Fprintf(f, `let currentTurn = 0
-function updateButtons() {
-	document.getElementById("turnLabel").textContent =
-		"Turn " + (currentTurn + 1) + " / " + turns.length;
-	document.getElementById("prev").disabled = currentTurn === 0;
-	document.getElementById("next").disabled = currentTurn === turns.length - 1;
-}
-`)
-		//hide all trains, unhide trains that are active on current turn, relocate trains
-		fmt.Fprintf(f, `function showTurn(currentTurn) {
-	document.querySelectorAll(".train").forEach(train => {
-		train.setAttribute("visibility", "hidden");
-	});
-	const entries = turns[currentTurn].split(" ");
-	for (const entry of entries) {
-		const [trainName, stationName] = entry.split("-");
-		const station = document.getElementById(stationName);
-		const train = document.getElementById(trainName);
-		const x = station.cx.baseVal.value;
-		const y = station.cy.baseVal.value;
-
-		train.setAttribute("visibility", "visible");
-		//x + offset + offset of offset (+12 +10), y (+10 -7)
-		train.querySelector("circle").setAttribute("cx", x+10);
-		train.querySelector("circle").setAttribute("cy", y+10);
-		train.querySelector("text").setAttribute("x", x+22);
-		train.querySelector("text").setAttribute("y", y+3);
-		}
-	}
-
-	document.getElementById("prev").onclick = () => {
-		if (currentTurn > 0) {
-			currentTurn--;
-			showTurn(currentTurn);
-			updateButtons();
-		}
-	};
-	document.getElementById("next").onclick = () => {
-		if (currentTurn + 1 < turns.length) {
-			currentTurn++;
-			showTurn(currentTurn);
-			updateButtons();
-		}
-	};
-showTurn(currentTurn);
-updateButtons();
-`)
-	}
-	fmt.Fprintln(f, `</script>`)
-	fmt.Fprintln(f, `</body>`)
-	fmt.Fprintln(f, `</html>`)
+	return nil
 }
 
-// generate a grid where stations are 100 x/y apart + small random adjustment
-// every station checks if it's not the last on its row/column, and if not, adds connections to those instead
-func generateGrid(rows, cols int) p.Network {
-	rng := rand.New(rand.NewSource(62))
-
-	n := p.Network{make(map[string]p.Station), make(map[string][]string)}
-
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			name := fmt.Sprintf("station_%03d", y*cols+x)
-			px := x*100 + rng.Intn(31) - 15
-			py := y*100 + rng.Intn(31) - 15
-			n.Stations[name] = p.Station{name, px, py}
-		}
+func createJSTurns(turnData []string) error {
+	f, err := os.Create("output/turns.js")
+	if err != nil {
+		return err
 	}
-
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			curr := fmt.Sprintf("station_%03d", y*cols+x)
-			if x+1 < cols {
-				right := fmt.Sprintf("station_%03d", y*cols+x+1)
-				n.Connections[curr] = append(n.Connections[curr], right)
-			}
-			if y+1 < rows {
-				down := fmt.Sprintf("station_%03d", (y+1)*cols+x)
-				n.Connections[curr] = append(n.Connections[curr], down)
-			}
-		}
+	defer f.Close()
+	fmt.Fprintln(f, "const turns = [")
+	for _, turn := range turnData {
+		fmt.Fprintf(f, "	%q,\n", turn)
 	}
-
-	return n
+	fmt.Fprintln(f, "];")
+	return nil
 }
