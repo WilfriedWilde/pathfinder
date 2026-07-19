@@ -17,7 +17,7 @@ svgObject.addEventListener("load", () => {
     let dragging = false;
     let lastX = 0;
     let lastY = 0;
-    let currentTurn = 0;
+    let currentTurn = -1;
 
     svg.addEventListener("wheel", e => {
         e.preventDefault();
@@ -70,7 +70,7 @@ svgObject.addEventListener("load", () => {
     function updateButtons() {
         turnLabel.textContent = `Turn ${currentTurn + 1} / ${turns.length}`;
 
-        prevButton.disabled = currentTurn === 0;
+        prevButton.disabled = currentTurn === -1;
         nextButton.disabled = currentTurn === turns.length - 1;
     }
 
@@ -78,6 +78,10 @@ svgObject.addEventListener("load", () => {
         svg.querySelectorAll(".train").forEach(train => {
             train.setAttribute("visibility", "hidden");
         });
+
+        if (turnIndex < 0) {
+            return;
+        }
 
         const entries = turns[turnIndex].split(" ");
 
@@ -101,7 +105,7 @@ svgObject.addEventListener("load", () => {
     }
 
     prevButton.onclick = () => {
-        if (currentTurn === 0) return;
+        if (currentTurn === -1) return;
 
         currentTurn--;
         showTurn(currentTurn);

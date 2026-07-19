@@ -161,6 +161,7 @@ func createJSTurns(turnData []string) error {
 	}
 	defer f.Close()
 	fmt.Fprintln(f, "const turns = [")
+	fmt.Fprintln(f, "	")
 	for _, turn := range turnData {
 		fmt.Fprintf(f, "	%q,\n", turn)
 	}
