@@ -6,6 +6,7 @@ import (
 	"os"
 	p "pathfinder/pathfinding"
 	"sort"
+	"strings"
 )
 
 type RoutesUsed struct {
@@ -28,12 +29,46 @@ func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels 
 	if err != nil {
 		return err
 	}
+
+	turnData = addStartStationTurn(turnData, r.Start)
+
 	err = createJSTurns(turnData)
 	if err != nil {
 		return err
 	}
 	startServer()
 	return nil
+}
+
+// addStartStationTurn adds an artificial "turn 0" for all trains, to properly initialize it at start station for animation purposes
+func addStartStationTurn(turnData []string, start string) []string {
+	seen := make(map[string]struct{})
+	initTurn := make(map[int][]string)
+
+	// go through turns, when seeing new trainid, appending that id (string) to the turn's index in initTurn
+	for ind, turn := range turnData {
+		for _, trainPos := range strings.Split(turn, " ") {
+			trainID := strings.Split(trainPos, "-")[0][1:] // "T15-stationName" so get the "T15" and skip the first index
+			if _, ok := seen[trainID]; !ok {
+				seen[trainID] = struct{}{}
+				initTurn[ind] = append(initTurn[ind], trainID)
+			}
+		}
+	}
+	// go through turns again, appending an extra start station turn for all the trains on the turn before their first appearance
+	for ind := range turnData {
+		for _, v := range initTurn[ind+1] {
+			turnData[ind] += " T" + v + "-" + start
+		}
+	}
+	// add "turn zero", so start station turn for the trains that show up on the first turn
+	turnZero := ""
+	for _, v := range initTurn[0] {
+		turnZero += "T" + v + "-" + start + " "
+	}
+	turnZero = strings.TrimSpace(turnZero)
+	turnData = append([]string{turnZero}, turnData...)
+	return turnData
 }
 
 func createSVG(n p.Network, r RoutesUsed, trains int) error {

@@ -11,13 +11,14 @@ svgObject.addEventListener("load", () => {
 
     const TRAIN_X = 10;
     const TRAIN_Y = 10;
-    const LABEL_X = 22;
-    const LABEL_Y = 3;
+    const LABEL_X = 17;
+    const LABEL_Y = 27;
+    const MOVE_DURATION = 375;
 
     let dragging = false;
     let lastX = 0;
     let lastY = 0;
-    let currentTurn = -1;
+    let currentTurn = 0;
 
     svg.addEventListener("wheel", e => {
         e.preventDefault();
@@ -68,44 +69,95 @@ svgObject.addEventListener("load", () => {
     });
 
     function updateButtons() {
-        turnLabel.textContent = `Turn ${currentTurn + 1} / ${turns.length}`;
+        turnLabel.textContent = `Turn ${currentTurn} / ${turns.length - 1}`;
 
-        prevButton.disabled = currentTurn === -1;
+        prevButton.disabled = currentTurn === 0;
         nextButton.disabled = currentTurn === turns.length - 1;
     }
 
-    function showTurn(turnIndex) {
-        svg.querySelectorAll(".train").forEach(train => {
-            train.setAttribute("visibility", "hidden");
-        });
+    let trainAnimations = {};
+    let trainState = {};
 
-        if (turnIndex < 0) {
-            return;
+
+    function setTrainPosition(train, x, y) {
+        train.querySelector("circle").setAttribute("cx", x + TRAIN_X);
+        train.querySelector("circle").setAttribute("cy", y + TRAIN_Y);
+        train.querySelector("text").setAttribute("x", x + LABEL_X);
+        train.querySelector("text").setAttribute("y", y + LABEL_Y);
+    }
+
+    function animateTrain(trainName, train, fromX, fromY, toX, toY) {
+    if (trainAnimations[trainName]) {
+        cancelAnimationFrame(trainAnimations[trainName]);
+    }
+
+    const start = performance.now();
+
+    function step(now) {
+        const t = Math.min((now - start) / MOVE_DURATION, 1);
+
+        const x = fromX + (toX - fromX) * t;
+        const y = fromY + (toY - fromY) * t;
+        setTrainPosition(train, x, y);
+
+        if (t < 1) {
+            trainAnimations[trainName] = requestAnimationFrame(step);
+        } else {
+            delete trainAnimations[trainName];
         }
+    }
 
+    trainAnimations[trainName] = requestAnimationFrame(step);
+    }
+
+    function showTurn(turnIndex) {
+    const activeTrains = new Set();
+
+    if (turnIndex >= 0) {
         const entries = turns[turnIndex].split(" ");
 
         for (const entry of entries) {
             const [trainName, stationName] = entry.split("-");
+            activeTrains.add(trainName);
 
             const station = svg.getElementById(stationName);
             const train = svg.getElementById(trainName);
 
-            const x = station.cx.baseVal.value;
-            const y = station.cy.baseVal.value;
+            const targetX = station.cx.baseVal.value;
+            const targetY = station.cy.baseVal.value;
 
+            const prevState = trainState[trainName];
             train.setAttribute("visibility", "visible");
 
-            train.querySelector("circle").setAttribute("cx", x + TRAIN_X);
-            train.querySelector("circle").setAttribute("cy", y + TRAIN_Y);
+            if (!prevState || !prevState.visible) {
+                setTrainPosition(train, targetX, targetY);
+            } else if (prevState.x !== targetX || prevState.y !== targetY) {
+                animateTrain(trainName, train, prevState.x, prevState.y, targetX, targetY);
+            }
 
-            train.querySelector("text").setAttribute("x", x + LABEL_X);
-            train.querySelector("text").setAttribute("y", y + LABEL_Y);
+            trainState[trainName] = { x: targetX, y: targetY, visible: true };
         }
     }
 
+    // hide any train not present this turn
+    svg.querySelectorAll(".train").forEach(train => {
+        const trainName = train.id;
+        if (!activeTrains.has(trainName)) {
+            train.setAttribute("visibility", "hidden");
+
+            if (trainAnimations[trainName]) {
+                cancelAnimationFrame(trainAnimations[trainName]);
+                delete trainAnimations[trainName];
+            }
+            if (trainState[trainName]) {
+                trainState[trainName].visible = false;
+            }
+        }
+    });
+}
+
     prevButton.onclick = () => {
-        if (currentTurn === -1) return;
+        if (currentTurn === 0) return;
 
         currentTurn--;
         showTurn(currentTurn);
