@@ -36,11 +36,16 @@ func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels 
 
 func createSVG(n p.Network, r RoutesUsed, trains int) error {
 	//create a [stationname] map that saves the color-to-be-used, empty if not part of found path
-	colorMap := make(map[string]string, 0)
+	colorMap := make(map[string]string)
+	routeEdges := make(map[string]struct{}) // track used edges
 	colorMap[r.Start] = "green"
 	colorMap[r.End] = "red"
 	for _, route := range r.Routes {
 		for ind, routeStation := range route {
+			if ind < len(route)-1 {
+				routeEdges[route[ind]+"|"+route[ind+1]] = struct{}{}
+				routeEdges[route[ind+1]+"|"+route[ind]] = struct{}{}
+			}
 			if ind == 0 || ind == len(route)-1 { // skip the already colored start/end stations
 				continue
 			}
@@ -103,9 +108,8 @@ func createSVG(n p.Network, r RoutesUsed, trains int) error {
 				continue
 			}
 			usedConnection[startSStation.Name+"|"+endSStation.Name] = struct{}{}
-			_, ok1 = colorMap[startSStation.Name]
-			_, ok2 = colorMap[endSStation.Name]
-			if ok1 && ok2 {
+			_, ok := routeEdges[startSStation.Name+"|"+endSStation.Name]
+			if ok {
 				fmt.Fprintf(f, `<line x1="%f" y1="%f" x2="%f" y2="%f" stroke="blue" stroke-width="%.2f"/>`+"\n", sx(startSStation.X, minX, scale), sy(startSStation.Y, minY, scale), sx(endSStation.X, minX, scale), sy(endSStation.Y, minY, scale), stroke)
 			} else {
 				fmt.Fprintf(f, `<line x1="%f" y1="%f" x2="%f" y2="%f" stroke="grey" stroke-width="%.2f"/>`+"\n", sx(startSStation.X, minX, scale), sy(startSStation.Y, minY, scale), sx(endSStation.X, minX, scale), sy(endSStation.Y, minY, scale), stroke)
