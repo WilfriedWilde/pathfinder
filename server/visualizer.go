@@ -23,16 +23,6 @@ type RenderConfig struct {
 	LabelYOffset float64
 }
 
-// normalize the x coordinate to svg's scale
-func scaleX(x, minX int, s float64) float64 {
-	return (float64(x - minX)) * s
-}
-
-// normalize the y coordinate to svg's scale
-func scaleY(y, minY int, s float64) float64 {
-	return (float64(y - minY)) * s
-}
-
 func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
 	err := createSVG(n, r, trains)
 	if err != nil {
@@ -194,6 +184,16 @@ func createConfig(stationCount, width, height int) RenderConfig {
 		LabelXOffset: labelXOffset,
 		LabelYOffset: labelYOffset,
 	}
+}
+
+// normalize the x coordinate to svg's scale
+func scaleX(x, minX int, s float64) float64 {
+	return (float64(x - minX)) * s
+}
+
+// normalize the y coordinate to svg's scale
+func scaleY(y, minY int, s float64) float64 {
+	return (float64(y - minY)) * s
 }
 
 // createJSTurns creates const turns[] in turns.js so javascript receives the turn info
