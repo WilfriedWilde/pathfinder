@@ -5,20 +5,21 @@ import (
 	"net/http"
 )
 
-func startServer() {
+func StartServer() {
+	mux := http.NewServeMux()
 
-	http.Handle("/static/",
+	mux.Handle("/static/",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("static"))))
-
-	http.Handle("/output/",
+	mux.Handle("/output/",
 		http.StripPrefix("/output/",
 			http.FileServer(http.Dir("output"))))
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/index.html")
-	})
+	mux.HandleFunc("/", HandleRoot)
 
 	fmt.Println("running on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", mux)
+}
+
+func HandleRoot(w http.ResponseWriter, r *http.Request) {
+
 }

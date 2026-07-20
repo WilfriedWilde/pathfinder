@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	i "pathfinder/internal"
 	p "pathfinder/pathfinding"
 	"reflect"
 	"testing"
@@ -10,37 +11,32 @@ import (
 func TestGetAndValidateUserInput(t *testing.T) {
 	tests := map[string]struct {
 		input  []string
-		output Config
+		output i.Config
 		err    string
 	}{
-		"Too few command-line arguments": {
-			input:  []string{},
-			output: Config{},
-			err:    "Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]",
-		},
 		"Start station and end station are the same": {
 			input:  []string{"networks/1.txt", "waterloo", "waterloo", "10"},
-			output: Config{},
+			output: i.Config{},
 			err:    "Error: start and end stations should be different",
 		},
 		"Number of train is 0": {
 			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "0"},
-			output: Config{},
+			output: i.Config{},
 			err:    "Error: number of train should be positive integer",
 		},
 		"Number of train is negative": {
 			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "0"},
-			output: Config{},
+			output: i.Config{},
 			err:    "Error: number of train should be positive integer",
 		},
 		"Number of train is not numeric": {
 			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "a"},
-			output: Config{},
+			output: i.Config{},
 			err:    "Error: number of train should be positive integer",
 		},
 		"Valid args": {
 			input: []string{"networks/1.txt", "waterloo", "st_pancras", "10"},
-			output: Config{
+			output: i.Config{
 				NetworkPath:  "networks/1.txt",
 				StartStation: "waterloo",
 				EndStation:   "st_pancras",
@@ -52,7 +48,7 @@ func TestGetAndValidateUserInput(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			config, err := GetAndValidateUserInput(test.input)
+			config, err := i.GetAndValidateUserInput(test.input)
 			var resultError string
 			if err != nil {
 				resultError = err.Error()
@@ -67,12 +63,12 @@ func TestGetAndValidateUserInput(t *testing.T) {
 
 func TestParseAndValidateNetwork(t *testing.T) {
 	tests := map[string]struct {
-		input  Config
+		input  i.Config
 		output p.Network
 		err    string
 	}{
 		"Too few fields in station data": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/too_few_fields_station_data.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -82,7 +78,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: station data corrupted",
 		},
 		"Too many fields in station data": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/too_many_fields_station_data.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -92,7 +88,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: station data corrupted",
 		},
 		"Invalid station name": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/invalid_station_name.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -102,7 +98,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 6: station name not valid",
 		},
 		"X coordinate is non numeric": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/char_x_coordinate.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -112,7 +108,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"X coordinate is float": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/float_x_coordinate.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -122,7 +118,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"X coordinate is negative": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/negative_x_coordinate.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -132,7 +128,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: x coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is non numeric": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/char_y_coordinate.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -142,7 +138,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is float": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/float_y_coordinate.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -152,7 +148,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Y coordinate is negative": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/negative_y_coordinate.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -162,7 +158,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 4: y coordinate for station waterloo is not a valid positive integer",
 		},
 		"Duplicated coordinates": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/duplicate_coordinates.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -172,7 +168,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 5: coordinates 3,1 are duplicated",
 		},
 		"Duplicated station name": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/duplicate_stations.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -182,7 +178,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 5: station name waterloo is duplicated",
 		},
 		"Too few fields in connection data": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/too_few_fields_connection_data.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -192,7 +188,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 10: connection data corrupted",
 		},
 		"Too many fields in connection data": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/too_many_fields_connection_data.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -202,7 +198,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 10: connection data corrupted",
 		},
 		"Invalid station name in connection": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/invalid_station_name_connection.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -212,7 +208,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 11: station name not valid",
 		},
 		"Duplicated connection AB": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/duplicate_connection-AB.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -222,7 +218,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 11: a connection is already existing between waterloo and victoria",
 		},
 		"Duplicated connection BA": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/testing/duplicate_connection-BA.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -232,7 +228,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 			err:    "Error line 11: a connection is already existing between victoria and waterloo",
 		},
 		"Valid output": {
-			input: Config{
+			input: i.Config{
 				NetworkPath:  "networks/1.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -258,7 +254,7 @@ func TestParseAndValidateNetwork(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			network, err := ParseAndValidateNetwork(test.input)
+			network, _, err := i.ParseAndValidateNetwork(test.input)
 			var resultError string
 			if err != nil {
 				resultError = err.Error()
@@ -276,7 +272,7 @@ func TestValidateNetwork(t *testing.T) {
 		network               p.Network
 		hasStationsSection    bool
 		hasConnectionsSection bool
-		config                Config
+		config                i.Config
 		output                string
 	}{
 		"Connection to unexisting station": {
@@ -295,7 +291,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/1.txt",
 				StartStation: "waterloo",
 				EndStation:   "victoria",
@@ -316,7 +312,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    false,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "waterloo",
 				EndStation:   "victoria",
@@ -337,7 +333,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: false,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "waterloo",
 				EndStation:   "victoria",
@@ -358,7 +354,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "euston",
 				EndStation:   "victoria",
@@ -379,7 +375,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "waterloo",
 				EndStation:   "euston",
@@ -405,7 +401,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "waterloo",
 				EndStation:   "victoria",
@@ -426,7 +422,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "waterloo",
 				EndStation:   "victoria",
@@ -452,7 +448,7 @@ func TestValidateNetwork(t *testing.T) {
 			},
 			hasStationsSection:    true,
 			hasConnectionsSection: true,
-			config: Config{
+			config: i.Config{
 				NetworkPath:  "networks/testing/whatever.txt",
 				StartStation: "waterloo",
 				EndStation:   "whatever",
@@ -464,7 +460,7 @@ func TestValidateNetwork(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := ValidateNetwork(test.network, test.hasStationsSection, test.hasConnectionsSection, test.config)
+			err := i.ValidateNetwork(test.network, test.hasStationsSection, test.hasConnectionsSection, test.config)
 			var resultError string
 			if err != nil {
 				resultError = err.Error()

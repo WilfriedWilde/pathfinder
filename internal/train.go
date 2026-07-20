@@ -1,14 +1,12 @@
-package main
+package internal
 
 import (
-	"fmt"
 	p "pathfinder/pathfinding"
 	"sort"
 )
 
 // divert returns a slice of the usable routes with ideal number of trains preassigned and the calculated turn count
 func divert(routes [][]string, trains int) ([]p.TrainRoute, int) {
-	fmt.Println(routes)
 	if len(routes) == 0 {
 		return nil, -1
 	}

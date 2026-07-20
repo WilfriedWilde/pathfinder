@@ -36,7 +36,7 @@ func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels 
 	if err != nil {
 		return err
 	}
-	startServer()
+
 	return nil
 }
 

@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"bufio"
@@ -12,11 +12,6 @@ import (
 
 // GetAndValidateUserInput returns a config file with the arguments parsed into
 func GetAndValidateUserInput(args []string) (config Config, err error) {
-	// check number command-line arguments
-	if len(args) < 4 {
-		return Config{}, fmt.Errorf("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
-	}
-
 	// extract args
 	config.NetworkPath, config.StartStation, config.EndStation = args[0], args[1], args[2]
 	numTrainsStr := args[3]
@@ -36,7 +31,7 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 }
 
 // ParseAndValidateNetwork builds and returns the basic (non-split) network
-func ParseAndValidateNetwork(config Config) (p.Network, error) {
+func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
 	network := p.Network{
 		Stations:    make(map[string]p.Station),
 		Connections: make(map[string][]string),
@@ -47,7 +42,7 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 	// parse data from network map
 	file, err := os.Open(config.NetworkPath)
 	if err != nil {
-		return p.Network{}, fmt.Errorf("Error opening file: %v", err.Error())
+		return p.Network{}, 0, fmt.Errorf("Error opening file: %v", err.Error())
 	}
 	defer file.Close()
 
@@ -85,7 +80,7 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 		if readingStations {
 			split := strings.Split(line, ",")
 			if len(split) != 3 {
-				return p.Network{}, fmt.Errorf("Error line %d: station data corrupted", lineNumber)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station data corrupted", lineNumber)
 
 			}
 
@@ -95,16 +90,16 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 			if strings.ContainsFunc(stationName, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
 			}) {
-				return p.Network{}, fmt.Errorf("Error line %d: station name not valid", lineNumber)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station name not valid", lineNumber)
 			}
 
 			x, xErr := strconv.Atoi(xStr)
 			if xErr != nil || x < 0 { // Accept 0 and positive integers to match testing examples
-				return p.Network{}, fmt.Errorf("Error line %d: x coordinate for station %s is not a valid positive integer", lineNumber, stationName)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: x coordinate for station %s is not a valid positive integer", lineNumber, stationName)
 			}
 			y, yErr := strconv.Atoi(yStr)
 			if yErr != nil || y < 0 { // Accept 0 and positive integers to match testing examples
-				return p.Network{}, fmt.Errorf("Error line %d: y coordinate for station %s is not a valid positive integer", lineNumber, stationName)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: y coordinate for station %s is not a valid positive integer", lineNumber, stationName)
 			}
 
 			station := p.Station{
@@ -116,21 +111,21 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 			// check if coordinates already exist
 			coords := fmt.Sprintf("%s,%s", xStr, yStr)
 			if _, found := coordinates[coords]; found {
-				return p.Network{}, fmt.Errorf("Error line %d: coordinates %s are duplicated", lineNumber, coords)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: coordinates %s are duplicated", lineNumber, coords)
 			}
 
 			coordinates[coords] = struct{}{}
 
 			// check if station name is duplicated
 			if _, found := network.Stations[stationName]; found {
-				return p.Network{}, fmt.Errorf("Error line %d: station name %s is duplicated", lineNumber, stationName)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station name %s is duplicated", lineNumber, stationName)
 			}
 
 			network.Stations[stationName] = station
 		} else if readingConnections {
 			split := strings.Split(line, "-")
 			if len(split) != 2 {
-				return p.Network{}, fmt.Errorf("Error line %d: connection data corrupted", lineNumber)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: connection data corrupted", lineNumber)
 			}
 
 			stationNameA, stationNameB := strings.TrimSpace(split[0]), strings.TrimSpace(split[1])
@@ -139,23 +134,23 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 			if strings.ContainsFunc(stationNameA, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
 			}) {
-				return p.Network{}, fmt.Errorf("Error line %d: station name not valid", lineNumber)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station name not valid", lineNumber)
 			}
 
 			// check if station name is valid
 			if strings.ContainsFunc(stationNameB, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
 			}) {
-				return p.Network{}, fmt.Errorf("Error line %d: station name not valid", lineNumber)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station name not valid", lineNumber)
 			}
 
 			// check if connections are already existing
 			if len(network.Connections[stationNameA]) > 0 && slices.Contains(network.Connections[stationNameA], stationNameB) {
-				return p.Network{}, fmt.Errorf("Error line %d: a connection is already existing between %s and %s", lineNumber, stationNameA, stationNameB)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: a connection is already existing between %s and %s", lineNumber, stationNameA, stationNameB)
 			}
 
 			if len(network.Connections[stationNameB]) > 0 && slices.Contains(network.Connections[stationNameB], stationNameA) {
-				return p.Network{}, fmt.Errorf("Error line %d: a connection is already existing between %s and %s", lineNumber, stationNameB, stationNameA)
+				return p.Network{}, 0, fmt.Errorf("Error line %d: a connection is already existing between %s and %s", lineNumber, stationNameB, stationNameA)
 			}
 
 			network.Connections[stationNameA] = append(network.Connections[stationNameA], stationNameB)
@@ -164,14 +159,14 @@ func ParseAndValidateNetwork(config Config) (p.Network, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return p.Network{}, fmt.Errorf("Scanner error: %v", err.Error())
+		return p.Network{}, 0, fmt.Errorf("Scanner error: %v", err.Error())
 	}
 
 	if err := ValidateNetwork(network, hasStationsSection, hasConnectionsSection, config); err != nil {
-		return p.Network{}, err
+		return p.Network{}, 0, err
 	}
 
-	return network, nil
+	return network, lineNumber, nil
 }
 
 // ValidateNetwork returns an error specifying why the network is invalid, if it is.

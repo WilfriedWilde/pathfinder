@@ -1,0 +1,16 @@
+const turns = [
+	"T1-start T2-start",
+	"T1-middle1 T2-bottom1 T3-start T4-start",
+	"T1-top1 T2-bottom2 T3-middle1 T4-bottom1 T5-start T6-start",
+	"T1-top2 T2-middle2 T3-top1 T4-bottom2 T5-middle1 T6-bottom1 T7-start T8-start",
+	"T1-end T2-end T3-top2 T4-middle2 T5-top1 T6-bottom2 T7-middle1 T8-bottom1 T9-start T10-start",
+	"T3-end T4-end T5-top2 T6-middle2 T7-top1 T8-bottom2 T9-middle1 T10-bottom1 T11-start T12-start",
+	"T5-end T6-end T7-top2 T8-middle2 T9-top1 T10-bottom2 T11-middle1 T12-bottom1 T13-start T14-start",
+	"T7-end T8-end T9-top2 T10-middle2 T11-top1 T12-bottom2 T13-middle1 T14-bottom1 T15-start T16-start",
+	"T9-end T10-end T11-top2 T12-middle2 T13-top1 T14-bottom2 T15-middle1 T16-bottom1 T17-start T18-start",
+	"T11-end T12-end T13-top2 T14-middle2 T15-top1 T16-bottom2 T17-middle1 T18-bottom1 T19-start T20-start",
+	"T13-end T14-end T15-top2 T16-middle2 T17-top1 T18-bottom2 T19-middle1 T20-bottom1",
+	"T15-end T16-end T17-top2 T18-middle2 T19-top1 T20-bottom2",
+	"T17-end T18-end T19-top2 T20-middle2",
+	"T19-end T20-end",
+];
