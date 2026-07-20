@@ -3,17 +3,17 @@
 #10 trains, 8 turn goal
 
 stations:
-start, 1, 1
-end, 2, 2
-middle1,3 ,3
-middle2,4 ,4
-bottom1,5,5
-bottom2,6,6
-top1,7,7
-top2,8,8
-topleft1,9,9
-topleft2,10,10
-topleft3,11,11
+start, 20, 20
+end, 40, 20
+middle1,28 ,20
+middle2,35 ,20
+bottom1,28,30
+bottom2,35,30
+top1,28,10
+top2,35,10
+topleft1,15,15
+topleft2,20,10
+topleft3,25,5
 
 connections:
 start-topleft1

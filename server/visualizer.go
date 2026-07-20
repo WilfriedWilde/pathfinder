@@ -1,12 +1,12 @@
-package main
+package server
 
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"os"
 	p "pathfinder/pathfinding"
 	"sort"
+	"strings"
 )
 
 type RoutesUsed struct {
@@ -15,111 +15,79 @@ type RoutesUsed struct {
 	Routes [][]string
 }
 
-func sx(x, minX int, s float64) float64 {
-	return (float64(x - minX)) * s
+type RenderConfig struct {
+	Scale        float64
+	Radius       float64
+	Stroke       float64
+	FontSize     float64
+	LabelXOffset float64
+	LabelYOffset float64
 }
 
-func sy(y, minY int, s float64) float64 {
-	return (float64(y - minY)) * s
-}
-
-func createMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) {
-	for _, v := range r.Routes {
-		v = v[1 : len(v)-1]
+func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
+	err := createSVG(n, r, trains)
+	if err != nil {
+		return err
 	}
-	//create a [stationname] map that saves the color-to-be-used, empty if not part of found path
-	colorMap := make(map[string]string, 0)
-	colorMap[r.Start] = "green"
-	colorMap[r.End] = "red"
-	for _, v := range r.Routes {
-		for _, v2 := range v {
-			colorMap[v2] = "orange"
+
+	turnData = addStartStationTurn(turnData, r.Start)
+
+	err = createJSTurns(turnData)
+	if err != nil {
+		return err
+	}
+	startServer()
+	return nil
+}
+
+// addStartStationTurn adds an artificial "turn 0" for all trains, to properly initialize it at start station for animation purposes
+func addStartStationTurn(turnData []string, start string) []string {
+	seen := make(map[string]struct{})
+	initTurn := make(map[int][]string)
+
+	// go through turns, when seeing new trainid, appending that id (string) to the turn's index in initTurn
+	for ind, turn := range turnData {
+		for _, trainPos := range strings.Split(turn, " ") {
+			trainID := strings.Split(trainPos, "-")[0][1:] // "T15-stationName" so get the "T15" and skip the first index
+			if _, ok := seen[trainID]; !ok {
+				seen[trainID] = struct{}{}
+				initTurn[ind] = append(initTurn[ind], trainID)
+			}
 		}
 	}
+	// go through turns again, appending an extra start station turn for all the trains on the turn before their first appearance
+	for ind := range turnData {
+		for _, v := range initTurn[ind+1] {
+			turnData[ind] += " T" + v + "-" + start
+		}
+	}
+	// add "turn zero", so start station turn for the trains that show up on the first turn
+	turnZero := ""
+	for _, v := range initTurn[0] {
+		turnZero += "T" + v + "-" + start + " "
+	}
+	turnZero = strings.TrimSpace(turnZero)
+	turnData = append([]string{turnZero}, turnData...)
+	return turnData
+}
+
+func createSVG(n p.Network, r RoutesUsed, trains int) error {
+
+	stationColors, edgeColors := buildRouteColors(r)
 
 	//get min/max values of input coordinates -> get max height/width -> calculate density/scale
-	minX, maxX := math.MaxInt, math.MinInt
-	minY, maxY := math.MaxInt, math.MinInt
+	minX, maxX, minY, maxY := getBounds(n)
 
-	for _, s := range n.Stations {
-		if s.X < minX {
-			minX = s.X
-		}
-		if s.X > maxX {
-			maxX = s.X
-		}
-		if s.Y < minY {
-			minY = s.Y
-		}
-		if s.Y > maxY {
-			maxY = s.Y
-		}
-	}
+	config := createConfig(len(n.Stations), maxX-minX, maxY-minY)
 
-	density := math.Sqrt(float64(len(n.Stations)))
-	width := maxX - minX
-	height := maxY - minY
-	canvas := 1000.0 //baseline that actual coordinates get scaled against
-	scale := canvas / float64(max(width, height))
-	//	extent := max(width, height)
-	radius := 6.0 / density * 10
-	radius = math.Max(radius, 0.15)
-	radius = math.Min(radius, 6.0)
-	stroke := 2.0 / density * 10
-	stroke = math.Max(stroke, 0.15)
-	stroke = math.Min(stroke, 2.0)
-	fontSize := 20.0
-	labelXOffset := 12.0 //offsets for showing text/trains without overlapping with actual station
-	labelYOffset := -7.0
-
-	f, err := os.Create("map2.html")
+	f, err := os.Create("output/map.svg")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 	defer f.Close()
 
-	fmt.Fprintln(f, `<!DOCTYPE html>`)
-	fmt.Fprintln(f, `<html>`)
-	fmt.Fprintln(f, `<body>`)
 	//generate viewbox with a buffer of 100 on every side compared to the svg map
 	fmt.Fprintf(f, `<svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="%d %d %d %d">`+"\n", -100, -100, 1200, 1200)
-
-	fmt.Fprintln(f, `<style>`)
-	//hide/show labels by default
-	if !labels {
-		fmt.Fprintln(f, `.station text {	display: none; }
-.station:hover text {display: block; }
-.train text {	display: none; }
-.train:hover text {display: block; }
-svg {
-	width: 100vw;
-	height: 100vh;
-	display: block;
-}`)
-	}
-	//if turns exist, css for turn buttons
-	if true {
-		fmt.Fprintln(f, `#controls {
-	position: fixed;
-	bottom: 20px;
-	left: 50%;
-	transform: translateX(-50%);
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	font-family: Arial, sans-serif;
-}
-#controls button {
-	font-size: 14px;
-	cursor: center;
-}
-#turnLabel {
-	min-width: 100px;
-	text-align: center;
-}`)
-	}
-	fmt.Fprintln(f, `</style>`)
 
 	//loop through all stations, loop through connected stations, check if connection has already been drawn, draw connection if not
 	usedConnection := make(map[string]struct{}, 0)
@@ -133,12 +101,11 @@ svg {
 				continue
 			}
 			usedConnection[startSStation.Name+"|"+endSStation.Name] = struct{}{}
-			_, ok1 = colorMap[startSStation.Name]
-			_, ok2 = colorMap[endSStation.Name]
-			if ok1 && ok2 {
-				fmt.Fprintf(f, `<line x1="%f" y1="%f" x2="%f" y2="%f" stroke="blue" stroke-width="%.2f"/>`+"\n", sx(startSStation.X, minX, scale), sy(startSStation.Y, minY, scale), sx(endSStation.X, minX, scale), sy(endSStation.Y, minY, scale), stroke)
+			edgeColor, ok := edgeColors[startSStation.Name+"|"+endSStation.Name]
+			if ok {
+				fmt.Fprintf(f, `<line x1="%f" y1="%f" x2="%f" y2="%f" stroke="%s" stroke-width="%.2f"/>`+"\n", scaleX(startSStation.X, minX, config.Scale), scaleY(startSStation.Y, minY, config.Scale), scaleX(endSStation.X, minX, config.Scale), scaleY(endSStation.Y, minY, config.Scale), edgeColor, config.Stroke)
 			} else {
-				fmt.Fprintf(f, `<line x1="%f" y1="%f" x2="%f" y2="%f" stroke="grey" stroke-width="%.2f"/>`+"\n", sx(startSStation.X, minX, scale), sy(startSStation.Y, minY, scale), sx(endSStation.X, minX, scale), sy(endSStation.Y, minY, scale), stroke)
+				fmt.Fprintf(f, `<line x1="%f" y1="%f" x2="%f" y2="%f" stroke="grey" stroke-width="%.2f"/>`+"\n", scaleX(startSStation.X, minX, config.Scale), scaleY(startSStation.Y, minY, config.Scale), scaleX(endSStation.X, minX, config.Scale), scaleY(endSStation.Y, minY, config.Scale), config.Stroke)
 
 			}
 		}
@@ -157,195 +124,124 @@ svg {
 	//also add text label at offset
 	for _, s := range stationSlice {
 		fmt.Fprintln(f, `<g class="station">`)
-		_, ok := colorMap[s.Name]
+		_, ok := stationColors[s.Name]
 		if !ok {
-			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="black"/>`+"\n", s.Name, sx(s.X, minX, scale), sy(s.Y, minY, scale), radius)
+			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="black"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius)
 		} else {
-			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, sx(s.X, minX, scale), sy(s.Y, minY, scale), radius, colorMap[s.Name], colorMap[s.Name])
+			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius, stationColors[s.Name], stationColors[s.Name])
 		}
-		fmt.Fprintf(f, `<text x="%.2f" y="%.2f" text-anchor="start" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">%s</text>`+"\n", sx(s.X, minX, scale)+labelXOffset, sy(s.Y, minY, scale)+labelYOffset, fontSize, s.Name)
+		fmt.Fprintf(f, `<text x="%.2f" y="%.2f" text-anchor="start" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">%s</text>`+"\n", scaleX(s.X, minX, config.Scale)+config.LabelXOffset, scaleY(s.Y, minY, config.Scale)+config.LabelYOffset, config.FontSize, s.Name)
 		fmt.Fprintln(f, `</g>`)
 	}
 
 	//initialize all required trains so they can be easily moved in js, also hide by default
 	for i := 1; i <= trains; i++ {
 		fmt.Fprintf(f, `<g class="train" id="T%d" visibility="hidden">`+"\n", i)
-		fmt.Fprintf(f, `<circle cx="%f" cy="%f" r="%.2f" fill="brown" stroke="brown"/>`+"\n", 0., 0., radius*0.8)
-		fmt.Fprintf(f, `<text x="%f" y="%f" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T%d</text>`+"\n", 0., 0., fontSize, i)
+		fmt.Fprintf(f, `<circle cx="%f" cy="%f" r="%.2f" fill="brown" stroke="brown"/>`+"\n", 0., 0., config.Radius*0.8)
+		fmt.Fprintf(f, `<text x="%f" y="%f" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.5" paint-order="stroke">T%d</text>`+"\n", 0., 0., config.FontSize, i)
 		fmt.Fprintln(f, `</g>`)
 
 	}
 
 	fmt.Fprintln(f, `</svg>`)
-	//controls for turns
-	fmt.Fprintf(f, `<div id="controls">
-	<button id="prev">Previous</button>
-	<span id="turnLabel"></span>
-	<button id="next">Next</button>
-</div>`)
-	//javascript
-	fmt.Fprintln(f, `
-<script>
-
-
-//viewbox panning/zooming
-const svg = document.getElementById("map");
-const viewBox = svg.viewBox.baseVal;
-
-let dragging = false;
-let lastX = 0;
-let lastY = 0;
-
-svg.addEventListener("wheel", e => {
-	e.preventDefault();
-	const rect = svg.getBoundingClientRect();
-	const mouseX = (e.clientX - rect.left) / rect.width;
-	const mouseY = (e.clientY - rect.top) / rect.height;
-	const oldWidth = viewBox.width;
-	const oldHeight = viewBox.height;
-	const factor = 1.2;
-
-	if (e.deltaY < 0) {
-		viewBox.width /= factor;
-		viewBox.height /= factor;
-	} else {
-		viewBox.width *= factor;
-		viewBox.height *= factor;
-	}
-
-	const widthDiff = oldWidth - viewBox.width;
-	const heightDiff = oldHeight - viewBox.height;
-
-	viewBox.x += widthDiff * mouseX;
-	viewBox.y += heightDiff * mouseY;
-});
-
-svg.addEventListener("mousedown", e => {
-	dragging = true;
-	lastX = e.clientX;
-	lastY = e.clientY;
-});
-
-window.addEventListener("mouseup", () => {
-	dragging = false;
-});
-
-window.addEventListener("mousemove", e => {
-
-	if (!dragging) {
-		return;
-	}
-
-	const dx = e.clientX - lastX;
-	const dy = e.clientY - lastY;
-
-	viewBox.x -= dx * (viewBox.width / svg.clientWidth);
-	viewBox.y -= dy * (viewBox.height / svg.clientHeight);
-
-	lastX = e.clientX;
-	lastY = e.clientY;
-});`)
-
-	//arrow key hotkeys for turns, convert turndata into js consts
-	if true {
-		fmt.Fprintf(f, `window.addEventListener("keydown", e => {
-	if (e.key === "ArrowLeft") {
-		e.preventDefault();
-		document.getElementById("prev").click();
-	} else if (e.key === "ArrowRight") {
-		e.preventDefault();
-		document.getElementById("next").click();
-	}
-});
-const turns = [
-`)
-		for _, v := range turnData {
-			fmt.Fprintf(f, "%q,\n", v)
-		}
-		fmt.Fprintln(f, `];`)
-		//update button state
-		fmt.Fprintf(f, `let currentTurn = 0
-function updateButtons() {
-	document.getElementById("turnLabel").textContent =
-		"Turn " + (currentTurn + 1) + " / " + turns.length;
-	document.getElementById("prev").disabled = currentTurn === 0;
-	document.getElementById("next").disabled = currentTurn === turns.length - 1;
-}
-`)
-		//hide all trains, unhide trains that are active on current turn, relocate trains
-		fmt.Fprintf(f, `function showTurn(currentTurn) {
-	document.querySelectorAll(".train").forEach(train => {
-		train.setAttribute("visibility", "hidden");
-	});
-	const entries = turns[currentTurn].split(" ");
-	for (const entry of entries) {
-		const [trainName, stationName] = entry.split("-");
-		const station = document.getElementById(stationName);
-		const train = document.getElementById(trainName);
-		const x = station.cx.baseVal.value;
-		const y = station.cy.baseVal.value;
-
-		train.setAttribute("visibility", "visible");
-		//x + offset + offset of offset (+12 +10), y (+10 -7)
-		train.querySelector("circle").setAttribute("cx", x+10);
-		train.querySelector("circle").setAttribute("cy", y+10);
-		train.querySelector("text").setAttribute("x", x+22);
-		train.querySelector("text").setAttribute("y", y+3);
-		}
-	}
-
-	document.getElementById("prev").onclick = () => {
-		if (currentTurn > 0) {
-			currentTurn--;
-			showTurn(currentTurn);
-			updateButtons();
-		}
-	};
-	document.getElementById("next").onclick = () => {
-		if (currentTurn + 1 < turns.length) {
-			currentTurn++;
-			showTurn(currentTurn);
-			updateButtons();
-		}
-	};
-showTurn(currentTurn);
-updateButtons();
-`)
-	}
-	fmt.Fprintln(f, `</script>`)
-	fmt.Fprintln(f, `</body>`)
-	fmt.Fprintln(f, `</html>`)
+	return nil
 }
 
-// generate a grid where stations are 100 x/y apart + small random adjustment
-// every station checks if it's not the last on its row/column, and if not, adds connections to those instead
-func generateGrid(rows, cols int) p.Network {
-	rng := rand.New(rand.NewSource(62))
-
-	n := p.Network{make(map[string]p.Station), make(map[string][]string)}
-
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			name := fmt.Sprintf("station_%03d", y*cols+x)
-			px := x*100 + rng.Intn(31) - 15
-			py := y*100 + rng.Intn(31) - 15
-			n.Stations[name] = p.Station{name, px, py}
-		}
+// buildRouteColors returns [stationname]stationcolor and [edge]color maps
+func buildRouteColors(r RoutesUsed) (map[string]string, map[string]string) {
+	stationColors := make(map[string]string)
+	edgeColors := make(map[string]string)
+	routeColors := []string{
+		"blue",
+		"green",
+		"orange",
+		"purple",
+		"teal",
+		"red",
 	}
 
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			curr := fmt.Sprintf("station_%03d", y*cols+x)
-			if x+1 < cols {
-				right := fmt.Sprintf("station_%03d", y*cols+x+1)
-				n.Connections[curr] = append(n.Connections[curr], right)
+	stationColors[r.Start] = "green"
+	stationColors[r.End] = "red"
+
+	for i, route := range r.Routes {
+		for ind, routeStation := range route {
+			if ind < len(route)-1 { // color the edges of the used route
+				edgeColors[route[ind]+"|"+route[ind+1]] = routeColors[i%6] // add both ways, because at this point I can't remember if this had been normalized earlier or not
+				edgeColors[route[ind+1]+"|"+route[ind]] = routeColors[i%6]
 			}
-			if y+1 < rows {
-				down := fmt.Sprintf("station_%03d", (y+1)*cols+x)
-				n.Connections[curr] = append(n.Connections[curr], down)
+			if ind == 0 || ind == len(route)-1 { // skip the already colored start/end stations
+				continue
 			}
+			stationColors[routeStation] = "orange"
 		}
 	}
+	return stationColors, edgeColors
+}
 
-	return n
+// getBounds returns the min/max x/y coordinates of the given graph
+func getBounds(n p.Network) (int, int, int, int) {
+	minX, maxX := math.MaxInt, math.MinInt
+	minY, maxY := math.MaxInt, math.MinInt
+	for _, s := range n.Stations {
+		if s.X < minX {
+			minX = s.X
+		}
+		if s.X > maxX {
+			maxX = s.X
+		}
+		if s.Y < minY {
+			minY = s.Y
+		}
+		if s.Y > maxY {
+			maxY = s.Y
+		}
+	}
+	return minX, maxX, minY, maxY
+}
+
+// createConfig returns a config struct with scalable values based on the input graph density/scale
+func createConfig(stationCount, width, height int) RenderConfig {
+	const canvas = 1000.0
+	const fontSize = 22.0
+	const labelXOffset = 10.0
+	const labelYOffset = -7.0
+
+	density := math.Sqrt(float64(stationCount))
+	scale := canvas / float64(max(width, height))
+	radius := math.Min(math.Max(6.0/density*10, 0.15), 6.0)
+	stroke := math.Min(math.Max(2.0/density*10, 0.15), 2.0)
+
+	return RenderConfig{
+		Scale:        scale,
+		Radius:       radius,
+		Stroke:       stroke,
+		FontSize:     fontSize,
+		LabelXOffset: labelXOffset,
+		LabelYOffset: labelYOffset,
+	}
+}
+
+// normalize the x coordinate to svg's scale
+func scaleX(x, minX int, s float64) float64 {
+	return (float64(x - minX)) * s
+}
+
+// normalize the y coordinate to svg's scale
+func scaleY(y, minY int, s float64) float64 {
+	return (float64(y - minY)) * s
+}
+
+// createJSTurns creates const turns[] in turns.js so javascript receives the turn info
+func createJSTurns(turnData []string) error {
+	f, err := os.Create("output/turns.js")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	fmt.Fprintln(f, "const turns = [")
+	for _, turn := range turnData {
+		fmt.Fprintf(f, "	%q,\n", turn)
+	}
+	fmt.Fprintln(f, "];")
+	return nil
 }

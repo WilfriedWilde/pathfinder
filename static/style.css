@@ -1,0 +1,34 @@
+.station text {	display: none; }
+
+.station:hover text {display: block; }
+
+.train text {	display: none; }
+
+.train:hover text {display: block; }
+
+#map {
+	width: 100vw;
+	height: 100vh;
+	display: block;
+}
+
+#controls {
+	position: fixed;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	font-family: Arial, sans-serif;
+}
+
+#controls button {
+	font-size: 14px;
+	cursor: pointer;
+}
+
+#turnLabel {
+	min-width: 100px;
+	text-align: center;
+}
