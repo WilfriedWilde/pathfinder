@@ -14,7 +14,20 @@ func main() {
 
 	if argsLength == 1 && os.Args[1] == "-s" {
 		// Server mode
-		s.StartServer()
+		config := i.Config{
+			Server: true,
+			Algorithms: []string{
+				"greedy",
+				"edmonds",
+				"dinic",
+				"bellman",
+				"dijkstra",
+			},
+		}
+
+		config.GetAllFilesData()
+		s.StartServer(config)
+		return
 	} else if argsLength < 4 {
 		log.Fatal("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	} else if argsLength == 4 {
@@ -31,11 +44,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	/*
-		err = s.CreateMap(network, s.RoutesUsed{config.StartStation, config.EndStation, fastestDijkstraRoutes}, turnData, config.NumTrains, true)
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
 }

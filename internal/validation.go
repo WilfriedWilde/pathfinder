@@ -27,11 +27,15 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 		return Config{}, fmt.Errorf("Error: number of train should be positive integer")
 	}
 
+	if len(args) == 5 {
+		config.Server = true
+	}
+
 	return
 }
 
 // ParseAndValidateNetwork builds and returns the basic (non-split) network
-func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
+func (config *Config) ParseAndValidateNetwork() (p.Network, int, error) {
 	network := p.Network{
 		Stations:    make(map[string]p.Station),
 		Connections: make(map[string][]string),
@@ -122,6 +126,10 @@ func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
 			}
 
 			network.Stations[stationName] = station
+
+			if config.Server {
+				config.FileStations[config.NetworkPath] = append(config.FileStations[config.NetworkPath], stationName)
+			}
 		} else if readingConnections {
 			split := strings.Split(line, "-")
 			if len(split) != 2 {
@@ -162,7 +170,7 @@ func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
 		return p.Network{}, 0, fmt.Errorf("Scanner error: %v", err.Error())
 	}
 
-	if err := ValidateNetwork(network, hasStationsSection, hasConnectionsSection, config); err != nil {
+	if err := ValidateNetwork(network, hasStationsSection, hasConnectionsSection, *config); err != nil {
 		return p.Network{}, 0, err
 	}
 
@@ -191,21 +199,23 @@ func ValidateNetwork(network p.Network, hasStationsSection, hasConnectionsSectio
 	_, foundStart := network.Stations[config.StartStation]
 	_, foundEnd := network.Stations[config.EndStation]
 
-	if !foundStart {
-		return fmt.Errorf("Error: start station does not exist")
-	}
+	if !config.Server {
+		if !foundStart {
+			return fmt.Errorf("Error: start station does not exist")
+		}
 
-	if !foundEnd {
-		return fmt.Errorf("Error: end station does not exist")
+		if !foundEnd {
+			return fmt.Errorf("Error: end station does not exist")
+		}
+
+		if _, found := p.BFS(&network, config.StartStation, config.EndStation); !found {
+			return fmt.Errorf("Error: No paths found between starting and ending stations")
+		}
 	}
 
 	// check max number stations
 	if len(network.Stations) > 10000 {
 		return fmt.Errorf("Error: the network map can only contains up to 10000 stations")
-	}
-
-	if _, found := p.BFS(&network, config.StartStation, config.EndStation); !found {
-		return fmt.Errorf("Error: No paths found between starting and ending stations")
 	}
 
 	return nil

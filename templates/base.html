@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<main>
+    <form>
+        <select id="select-file-names"></select>
+        <select id="select-start-station"></select>
+        <select id="select-end-station"></select>
+        <input type="number" id="select-train-numbers"></select>
+        <div id="select-algorithms"></div>
+    </form>
+    <ul id="results">
+        {{ range .Results }}
+            <li>
+                <p>{{ .Name }}</p>
+                <p>{{ .MaxTurns }}</p>
+                <p>{{ .TimeTaken }}</p>
+            </li>
+        {{ end }}
+    </ul>
+
+{{ if .GraphVisibility  }}
+<object id="map" data="/output/map.svg" type="image/svg+xml"></object>
+
+<div id="controls">
+	<button id="prev">Previous</button>
+	<span id="turnLabel"></span>
+	<button id="next">Next</button>
+</div>
+{{ end }}
+</main>
+
+<script src="/static/init.js" type="module"></script>
+{{ if .GraphVisibility  }}
+<script src="/output/turns.js"></script>
+<script src="/static/map.js"></script>
+{{ end }}
+
+</body>
+</html>
