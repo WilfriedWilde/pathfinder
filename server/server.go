@@ -37,7 +37,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := i.PageContent{}
-
+	fmt.Println(r.Form)
 	if len(r.Form) != 0 {
 		args := make([]string, 5)
 		args[0] = "networks/" + r.Form["file"][0]
@@ -46,6 +46,8 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		args[3] = r.Form["trains"][0]
 		args[4] = "server"
 		algorithms := r.Form["algorithms"]
+		fmt.Println(len(args))
+		fmt.Println(args)
 
 		data, err = i.RunLogic(args, algorithms)
 		if err != nil {

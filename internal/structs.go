@@ -26,3 +26,18 @@ type Config struct {
 	NumTrains    int
 	Server       bool
 }
+
+type RoutesUsed struct {
+	Start  string
+	End    string
+	Routes [][]string
+}
+
+type RenderConfig struct {
+	Scale        float64
+	Radius       float64
+	Stroke       float64
+	FontSize     float64
+	LabelXOffset float64
+	LabelYOffset float64
+}

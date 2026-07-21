@@ -6,12 +6,13 @@
 <body>
 
 <main>
-    <form>
-        <select id="select-file-names"></select>
-        <select id="select-start-station"></select>
-        <select id="select-end-station"></select>
-        <input type="number" id="select-train-numbers"></select>
-        <div id="select-algorithms"></div>
+    <form action="/">
+        <select id="select-file-names" name="file"></select>
+        <select id="select-start-station" name="start"></select>
+        <select id="select-end-station" name="end"></select>
+        <input type="number" id="select-train-numbers" min="1" max="1000000" value="10" name="trains">
+        <div id="select-algorithm"></div>
+        <button type="submit">Run</button>
     </form>
     <ul id="results">
         {{ range .Results }}

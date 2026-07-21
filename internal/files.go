@@ -31,6 +31,10 @@ func GetStationNames(fileName string) []string {
 			continue
 		}
 
+		if line == "connections:" && readingStations {
+			break
+		}
+
 		if readingStations {
 			split := strings.Split(line, ",")
 

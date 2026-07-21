@@ -1,13 +1,13 @@
 package internal
 
 import (
-	"os"
+	"fmt"
 	p "pathfinder/pathfinding"
 	"slices"
 )
 
 func RunLogic(args []string, algorithms []string) (PageContent, error) {
-	config, err := GetAndValidateUserInput(os.Args[1:])
+	config, err := GetAndValidateUserInput(args)
 	if err != nil {
 		return PageContent{}, err
 	}
@@ -102,6 +102,19 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		}
 
 		content.Results = append(content.Results, result)
+	}
+
+	if content.GraphVisibility {
+		routes := [][]string{}
+		for _, v := range content.Results[0].TrainRoutes {
+			routes = append(routes, v.Route)
+		}
+		turnData, err := PrintTurns(content.Results[0].TrainRoutes, content.Results[0].MaxTurns)
+		if err != nil {
+			return PageContent{}, err
+		}
+		fmt.Println("we here?")
+		CreateMap(network, RoutesUsed{config.StartStation, config.EndStation, routes}, turnData, config.NumTrains, false)
 	}
 
 	return content, nil
