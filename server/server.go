@@ -1,14 +1,18 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	i "pathfinder/internal"
+	"slices"
 )
 
-func StartServer(config i.Config) {
+func StartServer(serverInit ServerInit) {
 	mux := http.NewServeMux()
 
 	mux.Handle("/static/",
@@ -18,7 +22,7 @@ func StartServer(config i.Config) {
 		http.StripPrefix("/output/",
 			http.FileServer(http.Dir("output"))))
 	mux.HandleFunc("/", HandleRoot)
-	mux.HandleFunc("/api/init", config.HandleInitData)
+	mux.HandleFunc("/api/init", serverInit.HandleInitData)
 
 	fmt.Println("running on http://localhost:8081")
 	if err := http.ListenAndServe(":8081", mux); err != nil {
@@ -55,4 +59,39 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmp.Execute(w, data)
+}
+
+func (s *ServerInit) HandleInitData(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(s)
+}
+
+func (s *ServerInit) GetAllFilesData() error {
+	root := os.DirFS("networks/")
+
+	txtFiles, err := fs.Glob(root, "*.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Println(txtFiles)
+
+	fileNames := make(map[string]string)
+
+	s.FileNames = make([]string, 0)
+	s.FileStations = make(map[string][]string, 0)
+
+	for _, v := range txtFiles {
+		fileNames[v] = "networks/" + v
+	}
+
+	s.FileStations = make(map[string][]string, 0)
+	for key := range fileNames {
+		s.FileNames = append(s.FileNames, key)
+	}
+	slices.Sort(s.FileNames)
+
+	for _, name := range s.FileNames {
+		s.FileStations[name] = append(s.FileStations[name], i.GetStationNames(fileNames[name])...)
+	}
+
+	return nil
 }

@@ -9,21 +9,6 @@ import (
 	"strings"
 )
 
-type RoutesUsed struct {
-	Start  string
-	End    string
-	Routes [][]string
-}
-
-type RenderConfig struct {
-	Scale        float64
-	Radius       float64
-	Stroke       float64
-	FontSize     float64
-	LabelXOffset float64
-	LabelYOffset float64
-}
-
 func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
 	err := createSVG(n, r, trains)
 	if err != nil {
@@ -124,11 +109,15 @@ func createSVG(n p.Network, r RoutesUsed, trains int) error {
 	//also add text label at offset
 	for _, s := range stationSlice {
 		fmt.Fprintln(f, `<g class="station">`)
-		_, ok := stationColors[s.Name]
+		col, ok := stationColors[s.Name]
 		if !ok {
 			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="black"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius)
 		} else {
-			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius, stationColors[s.Name], stationColors[s.Name])
+			if col == "green" || col == "red" {
+				fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius*1.5, stationColors[s.Name], stationColors[s.Name])
+			} else {
+				fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius, stationColors[s.Name], stationColors[s.Name])
+			}
 		}
 		fmt.Fprintf(f, `<text x="%.2f" y="%.2f" text-anchor="start" font-family="Arial" font-size="%.2f" fill="black" stroke="white" stroke-width="2.8" paint-order="stroke">%s</text>`+"\n", scaleX(s.X, minX, config.Scale)+config.LabelXOffset, scaleY(s.Y, minY, config.Scale)+config.LabelYOffset, config.FontSize, s.Name)
 		fmt.Fprintln(f, `</g>`)

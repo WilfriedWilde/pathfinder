@@ -35,7 +35,7 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 }
 
 // ParseAndValidateNetwork builds and returns the basic (non-split) network
-func (config *Config) ParseAndValidateNetwork() (p.Network, int, error) {
+func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
 	network := p.Network{
 		Stations:    make(map[string]p.Station),
 		Connections: make(map[string][]string),
@@ -126,10 +126,6 @@ func (config *Config) ParseAndValidateNetwork() (p.Network, int, error) {
 			}
 
 			network.Stations[stationName] = station
-
-			if config.Server {
-				config.FileStations[config.NetworkPath] = append(config.FileStations[config.NetworkPath], stationName)
-			}
 		} else if readingConnections {
 			split := strings.Split(line, "-")
 			if len(split) != 2 {
@@ -170,7 +166,7 @@ func (config *Config) ParseAndValidateNetwork() (p.Network, int, error) {
 		return p.Network{}, 0, fmt.Errorf("Scanner error: %v", err.Error())
 	}
 
-	if err := ValidateNetwork(network, hasStationsSection, hasConnectionsSection, *config); err != nil {
+	if err := ValidateNetwork(network, hasStationsSection, hasConnectionsSection, config); err != nil {
 		return p.Network{}, 0, err
 	}
 

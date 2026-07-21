@@ -1,37 +1,45 @@
 package internal
 
 import (
-	"fmt"
-	"io/fs"
+	"bufio"
 	"os"
-	"path"
+	"strings"
 )
 
-func (c *Config) GetAllFilesData() error {
-	root := os.DirFS("networks/")
+func GetStationNames(fileName string) []string {
+	ret := []string{}
+	file, _ := os.Open(fileName)
+	defer file.Close()
 
-	txtFiles, err := fs.Glob(root, "*.txt")
-	if err != nil {
-		return err
+	readingStations := false
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		hashtagIndex := strings.Index(line, "#")
+
+		if hashtagIndex != -1 {
+			line = strings.TrimSpace(line[:hashtagIndex])
+		}
+
+		if line == "" {
+			continue
+		}
+
+		if line == "stations:" {
+			readingStations = true
+			continue
+		}
+
+		if readingStations {
+			split := strings.Split(line, ",")
+
+			stationName := strings.TrimSpace(split[0])
+
+			ret = append(ret, stationName)
+
+		}
+
 	}
-	fmt.Println(txtFiles)
-
-	c.FileNames = make([]string, 0)
-	c.FileStations = make(map[string][]string, 0)
-
-	for _, v := range txtFiles {
-		c.FileNames = append(c.FileNames, path.Join("networks/", v))
-	}
-
-	c.FileStations = make(map[string][]string, 0)
-	for _, name := range c.FileNames {
-		c.FileStations[name] = make([]string, 0)
-	}
-
-	for _, name := range c.FileNames {
-		c.NetworkPath = name
-		c.ParseAndValidateNetwork()
-	}
-
-	return nil
+	return ret
 }

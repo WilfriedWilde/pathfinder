@@ -18,12 +18,29 @@ const endSelect = document.getElementById("select-end-station")
 const trainSelect = document.getElementById("select-train-numbers")
 const algoSelect = document.getElementById("select-algorithm")
 
-fileSelect.name = "file"
+const firstFile = "1.txt"
+console.log(initData)
+
 initData.names.forEach(name => {
     const option = document.createElement("option")
+
+    if (name === firstFile) {
+        option.selected = true
+
+    }
 
     option.value = name
     option.innerText = name
 
     fileSelect.appendChild(option)
 });
+
+initData.stations[firstFile].forEach(station => {
+    const option = document.createElement("option")
+
+    option.value = station
+    option.innerText = station
+
+    startSelect.appendChild(option)
+    endSelect.appendChild(option)
+})

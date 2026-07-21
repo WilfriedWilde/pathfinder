@@ -14,8 +14,7 @@ func main() {
 
 	if argsLength == 1 && os.Args[1] == "-s" {
 		// Server mode
-		config := i.Config{
-			Server: true,
+		serverInit := s.ServerInit{
 			Algorithms: []string{
 				"greedy",
 				"edmonds",
@@ -25,8 +24,8 @@ func main() {
 			},
 		}
 
-		config.GetAllFilesData()
-		s.StartServer(config)
+		serverInit.GetAllFilesData()
+		s.StartServer(serverInit)
 		return
 	} else if argsLength < 4 {
 		log.Fatal("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")

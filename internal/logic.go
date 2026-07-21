@@ -1,37 +1,10 @@
 package internal
 
 import (
-	"encoding/json"
-	"net/http"
 	"os"
 	p "pathfinder/pathfinding"
 	"slices"
-	"time"
 )
-
-type Result struct {
-	Name        string // algorithm name
-	TrainRoutes []p.TrainRoute
-	MaxTurns    int
-	TimeTaken   time.Duration
-}
-
-type PageContent struct {
-	GraphVisibility bool
-	Results         []Result
-	ErrorMessage    string
-}
-
-type Config struct {
-	NetworkPath  string
-	StartStation string
-	EndStation   string
-	NumTrains    int
-	Server       bool
-	Algorithms   []string            `json:"algorithms"`
-	FileNames    []string            `json:"names"`
-	FileStations map[string][]string `json:"stations"`
-}
 
 func RunLogic(args []string, algorithms []string) (PageContent, error) {
 	config, err := GetAndValidateUserInput(os.Args[1:])
@@ -39,7 +12,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		return PageContent{}, err
 	}
 
-	network, NumLines, err := config.ParseAndValidateNetwork()
+	network, NumLines, err := ParseAndValidateNetwork(config)
 	if err != nil {
 		return PageContent{}, err
 	}
@@ -132,8 +105,4 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 	}
 
 	return content, nil
-}
-
-func (config *Config) HandleInitData(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(config)
 }
