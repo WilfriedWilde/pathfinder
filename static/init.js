@@ -14,8 +14,8 @@ const initData = await fetchInitData()
 
 const params = new URLSearchParams(window.location.search);
 const selectedFile = params.get("file") || "1.txt";
-const selectedStart = params.get("start");
-const selectedEnd = params.get("end")
+let selectedStart = params.get("start");
+let selectedEnd = params.get("end")
 const selectedTrains = params.get("trains") || "10";
 const selectedAlgos = params.getAll("algorithms");
 
@@ -95,12 +95,14 @@ function populateSelectStation(file) {
 
     if (selectedStart) {
         startSelect.value = selectedStart;
+        selectedStart = null;
     } else {
         Array.from(startSelect.querySelectorAll('option'))[0].selected = true
     }
 
     if (selectedEnd) {
         endSelect.value = selectedEnd;
+        selectedEnd = null;
     } else {
         Array.from(endSelect.querySelectorAll('option'))[1].selected = true
     }
