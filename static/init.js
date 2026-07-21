@@ -12,18 +12,27 @@ async function fetchInitData() {
 
 const initData = await fetchInitData()
 
+const params = new URLSearchParams(window.location.search);
+const selectedFile = params.get("file") || "1.txt";
+const selectedStart = params.get("start");
+const selectedEnd = params.get("end")
+const selectedTrains = params.get("trains") || "10";
+const selectedAlgos = params.getAll("algorithms");
+
 const fileSelect = document.getElementById("select-file-names")
 const startSelect = document.getElementById("select-start-station")
 const endSelect = document.getElementById("select-end-station")
 const trainSelect = document.getElementById("select-train-numbers")
+
+trainSelect.value = selectedTrains;
+
 const algoSelect = document.getElementById("select-algorithm")
 
-const firstFile = "1.txt"
 console.log(initData)
 initData.names.forEach(name => {
     const option = document.createElement("option")
 
-    if (name === firstFile) {
+    if (name === selectedFile) {
         option.selected = true
 
     }
@@ -35,14 +44,16 @@ initData.names.forEach(name => {
 });
 
 // init select stations
-populateSelectStation(firstFile)
+populateSelectStation(selectedFile)
 
 initData.algorithms.forEach(algo => {
     const container = document.createElement('div')
     container.classList.add('algorithm-option-container')
 
     const checkbox = document.createElement('input')
-    if (algo === 'dijkstra') {
+    if (selectedAlgos.length > 0) {
+        checkbox.checked = selectedAlgos.includes(algo);
+    } else if (algo === "dijkstra") {
         checkbox.checked = true
     }
 
@@ -82,7 +93,15 @@ function populateSelectStation(file) {
         endSelect.appendChild(optionEnd)
     })
 
-    Array.from(startSelect.querySelectorAll('option'))[0].selected = true
-    Array.from(endSelect.querySelectorAll('option'))[1].selected = true
-}
+    if (selectedStart) {
+        startSelect.value = selectedStart;
+    } else {
+        Array.from(startSelect.querySelectorAll('option'))[0].selected = true
+    }
 
+    if (selectedEnd) {
+        endSelect.value = selectedEnd;
+    } else {
+        Array.from(endSelect.querySelectorAll('option'))[1].selected = true
+    }
+}
