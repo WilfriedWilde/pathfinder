@@ -154,6 +154,10 @@ func buildRouteColors(r RoutesUsed) (map[string]string, map[string]string) {
 
 	for i, route := range r.Routes {
 		for ind, routeStation := range route {
+			if ind == 0 {
+				edgeColors[r.Start+"|"+route[ind]] = routeColors[i%6]
+				edgeColors[route[ind]+"|"+r.Start] = routeColors[i%6]
+			}
 			if ind < len(route)-1 { // color the edges of the used route
 				edgeColors[route[ind]+"|"+route[ind+1]] = routeColors[i%6] // add both ways, because at this point I can't remember if this had been normalized earlier or not
 				edgeColors[route[ind+1]+"|"+route[ind]] = routeColors[i%6]
