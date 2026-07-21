@@ -114,7 +114,7 @@ func createSVG(n p.Network, r RoutesUsed, trains int) error {
 			fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="black"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius)
 		} else {
 			if col == "green" || col == "red" {
-				fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius*1.5, stationColors[s.Name], stationColors[s.Name])
+				fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius*2.25, stationColors[s.Name], stationColors[s.Name])
 			} else {
 				fmt.Fprintf(f, `<circle id="%s" cx="%f" cy="%f" r="%.2f" stroke="%s" fill="%s"/>`+"\n", s.Name, scaleX(s.X, minX, config.Scale), scaleY(s.Y, minY, config.Scale), config.Radius, stationColors[s.Name], stationColors[s.Name])
 			}
@@ -162,7 +162,7 @@ func buildRouteColors(r RoutesUsed) (map[string]string, map[string]string) {
 				edgeColors[route[ind]+"|"+route[ind+1]] = routeColors[i%6] // add both ways, because at this point I can't remember if this had been normalized earlier or not
 				edgeColors[route[ind+1]+"|"+route[ind]] = routeColors[i%6]
 			}
-			if ind == 0 || ind == len(route)-1 { // skip the already colored start/end stations
+			if ind == len(route)-1 { // skip the already colored end stations
 				continue
 			}
 			stationColors[routeStation] = "orange"
