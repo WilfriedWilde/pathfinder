@@ -29,45 +29,16 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 
 	edgeNetwork := network.ConvertIntoFlow(config.StartStation, config.EndStation)
 
-	if slices.Contains(algorithms, "greedy") {
-		repeatedBFSRoutes, _, bfsTime := network.GreedyBFS(config.StartStation, config.EndStation)
-		trainRoutes, maxTurnsBFS := divert(repeatedBFSRoutes, config.NumTrains)
+	if slices.Contains(algorithms, "dijkstra") {
+		dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.Dijkstra)
+		fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
+		trainRoutes, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
 
 		result := Result{
-			Name:        "greedy",
+			Name:        "dijkstra",
 			TrainRoutes: trainRoutes,
-			MaxTurns:    maxTurnsBFS,
-			TimeTaken:   bfsTime,
-		}
-
-		content.Results = append(content.Results, result)
-	}
-
-	if slices.Contains(algorithms, "edmonds") {
-		ekRouteSets, _, ekTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.BFSFlow)
-		fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.NumTrains)
-		trainRoutes, maxTurnsEK := divert(fastestEKRoutes, config.NumTrains)
-
-		result := Result{
-			Name:        "edmonds",
-			TrainRoutes: trainRoutes,
-			MaxTurns:    maxTurnsEK,
-			TimeTaken:   ekTime,
-		}
-
-		content.Results = append(content.Results, result)
-	}
-
-	if slices.Contains(algorithms, "dinic") {
-		dinicRouteSets, _, dinicTime := edgeNetwork.Dinic(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation])
-		fastestDinicRoutes := GetFastestRouteSet(dinicRouteSets, config.NumTrains)
-		trainRoutes, maxTurnsDinic := divert(fastestDinicRoutes, config.NumTrains)
-
-		result := Result{
-			Name:        "dinic",
-			TrainRoutes: trainRoutes,
-			MaxTurns:    maxTurnsDinic,
-			TimeTaken:   dinicTime,
+			MaxTurns:    maxTurnsDijkstra,
+			TimeTaken:   dijkstraTime,
 		}
 
 		content.Results = append(content.Results, result)
@@ -88,16 +59,45 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		content.Results = append(content.Results, result)
 	}
 
-	if slices.Contains(algorithms, "dijkstra") {
-		dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.Dijkstra)
-		fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
-		trainRoutes, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
+	if slices.Contains(algorithms, "dinic") {
+		dinicRouteSets, _, dinicTime := edgeNetwork.Dinic(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation])
+		fastestDinicRoutes := GetFastestRouteSet(dinicRouteSets, config.NumTrains)
+		trainRoutes, maxTurnsDinic := divert(fastestDinicRoutes, config.NumTrains)
 
 		result := Result{
-			Name:        "dijkstra",
+			Name:        "dinic",
 			TrainRoutes: trainRoutes,
-			MaxTurns:    maxTurnsDijkstra,
-			TimeTaken:   dijkstraTime,
+			MaxTurns:    maxTurnsDinic,
+			TimeTaken:   dinicTime,
+		}
+
+		content.Results = append(content.Results, result)
+	}
+
+	if slices.Contains(algorithms, "edmonds") {
+		ekRouteSets, _, ekTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.BFSFlow)
+		fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.NumTrains)
+		trainRoutes, maxTurnsEK := divert(fastestEKRoutes, config.NumTrains)
+
+		result := Result{
+			Name:        "edmonds",
+			TrainRoutes: trainRoutes,
+			MaxTurns:    maxTurnsEK,
+			TimeTaken:   ekTime,
+		}
+
+		content.Results = append(content.Results, result)
+	}
+
+	if slices.Contains(algorithms, "greedy") {
+		repeatedBFSRoutes, _, bfsTime := network.GreedyBFS(config.StartStation, config.EndStation)
+		trainRoutes, maxTurnsBFS := divert(repeatedBFSRoutes, config.NumTrains)
+
+		result := Result{
+			Name:        "greedy",
+			TrainRoutes: trainRoutes,
+			MaxTurns:    maxTurnsBFS,
+			TimeTaken:   bfsTime,
 		}
 
 		content.Results = append(content.Results, result)
