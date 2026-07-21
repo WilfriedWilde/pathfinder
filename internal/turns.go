@@ -16,7 +16,7 @@ func PrintTurns(trainRoutes []p.TrainRoute, maxTurns int) ([]string, error) {
 	}
 
 	turns := make([]strings.Builder, maxTurns)
-	turnCAP := 50 // caping fo visualization
+	turnCAP := 50 // capping fo visualization
 	ret := make([]string, 0)
 
 	var maxTrains int
@@ -43,8 +43,8 @@ func PrintTurns(trainRoutes []p.TrainRoute, maxTurns int) ([]string, error) {
 	}
 
 	// store output for visualization and print it to terminal
-	for _, turn := range turns {
-		if maxTurns <= turnCAP {
+	for turnNum, turn := range turns {
+		if turnNum <= turnCAP {
 			ret = append(ret, strings.TrimSpace(turn.String()))
 		}
 

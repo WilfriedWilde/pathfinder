@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	p "pathfinder/pathfinding"
 	"slices"
 )
@@ -113,7 +112,6 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		if err != nil {
 			return PageContent{}, err
 		}
-		fmt.Println("we here?")
 		CreateMap(network, RoutesUsed{config.StartStation, config.EndStation, routes}, turnData, config.NumTrains, false)
 	}
 
