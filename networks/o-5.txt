@@ -6,5 +6,5 @@ half-end
 
 stations:
 start, 1, 1
-end, 2, 2
 half, 3, 3
+end, 2, 2

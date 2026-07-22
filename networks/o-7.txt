@@ -4,7 +4,6 @@
 
 stations:
 start, 20, 20
-end, 40, 20
 middle1,28 ,20
 middle2,35 ,20
 bottom1,28,30
@@ -14,6 +13,7 @@ top2,35,10
 topleft1,15,15
 topleft2,20,10
 topleft3,25,5
+end, 40, 20
 
 connections:
 start-topleft1

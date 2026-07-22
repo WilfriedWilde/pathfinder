@@ -60,9 +60,11 @@ initData.algorithms.forEach(algo => {
     checkbox.type = "checkbox"
     checkbox.value = algo
     checkbox.name = "algorithms"
+    checkbox.id = algo
 
     const label = document.createElement('label')
     label.innerText = algo
+    label.for = algo
 
     container.append(checkbox, label)
     algoSelect.appendChild(container)
@@ -104,6 +106,7 @@ function populateSelectStation(file) {
         endSelect.value = selectedEnd;
         selectedEnd = null;
     } else {
-        Array.from(endSelect.querySelectorAll('option'))[1].selected = true
+        const options = Array.from(endSelect.querySelectorAll('option'))
+        options[options.length-1].selected = true
     }
 }

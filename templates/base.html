@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pathfinder</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
 <main>
+    <h1 id="title">pathfinder visualizer</h1>
     <form action="/">
         <section id="inputs-container">
             <div class="form-field">
@@ -33,48 +38,54 @@
     </form>
 
     {{ if .ErrorMessage}}
-    <section id="error-container">
-        <h4 class="label">error</h4>
-        <p>{{ .ErrorMessage }}</p>
-    </section>
+        <p id="error-message">{{ .ErrorMessage }}</p>
     {{ else }}
-    <section id="summary-container">
-        <h4 class="label">run summary</h4>
-        <ul id="results">
-        {{ range .Summaries }}
-            <li>
-                <p>{{ .Name }}</p>
-                <p>{{ .MaxTurns }}</p>
-                <p>{{ .TimeTaken }}</p>
-            </li>
-        {{ end }}
-        </ul>
-    </section>
-    {{ end }}
-
-    {{ if .GraphVisibility  }}
-    <object id="map" data="/output/map.svg" type="image/svg+xml"></object>
-    <div id="controls">
-        <button id="prev">Previous</button>
-        <span id="turnLabel"></span>
-        <button id="next">Next</button>
-    </div>
-    {{ else }}
-    <section id="routes-container">
-        <h4 class="label">routes</h4>
-        <ul id="routes-list">
-            {{ range $routeID, $route := .Routes}}
-            <li>
-                <h5>flow {{ increment1 $routeID }}</h5>
-                <ul class="route-stations">
-                    {{ range $stationID, $station := $route }}
-                    <li>{{ increment1 $stationID }}. {{ $station }}</li>
-                    {{ end }}
-                </ul>
-            </li>
+        <section id="summary-container">
+            <h4 class="label">run summary</h4>
+            <ul id="summaries">
+            {{ range .Summaries }}
+                <li>
+                    <p class="summary-algo">{{ .Name }}</p>
+                    <div class="summary-data-container">
+                        <div class="summary-data-entry">
+                            <img src="/static/icons/turn.png">
+                            <p>{{ .MaxTurns }}</p>
+                        </div>
+                        <div class="summary-data-entry">
+                            <img src="/static/icons/time.png">
+                            <p>{{ .TimeTaken }}</p>
+                        </div>
+                    </div>
+                </li>
             {{ end }}
-        </ul>
-    </section>
+            </ul>
+        </section>
+        {{ if .GraphVisibility  }}
+        <section id="map-container">
+            <object id="map" data="/output/map.svg" type="image/svg+xml"></object>
+            <div id="controls">
+                <button id="prev">Previous</button>
+                <span id="turnLabel"></span>
+                <button id="next">Next</button>
+            </div>
+        </section>
+        {{ else }}
+        <section id="routes-container">
+            <h4 class="label">routes</h4>
+            <ul id="routes-list">
+                {{ range $routeID, $route := .Routes}}
+                <li>
+                    <h5>flow {{ increment1 $routeID }}</h5>
+                    <ul class="route-stations">
+                        {{ range $stationID, $station := $route }}
+                        <li>{{ increment1 $stationID }}. {{ $station }}</li>
+                        {{ end }}
+                    </ul>
+                </li>
+                {{ end }}
+            </ul>
+        </section>
+        {{ end }}
     {{ end }}
 
 </main>
