@@ -57,7 +57,28 @@ main {
 
 .label {
 	font-family: var(--font-header);
+	font-size: var(--font-size-h6);
 	text-transform: uppercase;
+}
+
+select,
+::picker(select) {
+	appearance: base-select;
+}
+
+::picker(select) {
+	appearance: base-select;
+	border: 1px solid var(--color-border);
+	border-radius: 5px;
+}
+
+select::picker-icon {
+	color: var(--color-primary);
+	transition: 0.4s ease;
+}
+
+select:open::picker-icon {
+	rotate: 180deg;
 }
 
 /* ----------- FORM ------------ */
@@ -69,10 +90,8 @@ form {
 
 #inputs-container {
 	display: flex;
-	justify-content: space-between;
 	width: 100%;
 	padding: var(--spacing-5);
-	gap: var(--spacing-4);
 }
 
 .form-field {
@@ -92,6 +111,47 @@ form {
     padding: var(--spacing-1);
     border-radius: 5px;
     font-family: var(--font-body);
+}
+
+.form-field select {
+	gap: var(--spacing-3);
+}
+
+.form-field select:hover {
+	cursor: pointer;
+}
+
+.form-field option {
+	padding: var(--spacing-1);
+    display: flex;
+    justify-content: flex-start;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    transition: 0.4s ease;
+}
+
+.form-field option:hover {
+	background-color: var(--color-primary);
+}
+
+#select-algorithm {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-2);
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 5px;
+	padding: var(--spacing-2);
+	font-family: var(--font-body);
+	color: var(--color-text);
+	text-transform: capitalize;
+}
+
+.algorithm-option-container {
+	display: flex;
+	gap: var(--spacing-3);
+	align-items: center;
 }
 
 /* ----------- GRAPH ----------- */

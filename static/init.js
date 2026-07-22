@@ -60,9 +60,11 @@ initData.algorithms.forEach(algo => {
     checkbox.type = "checkbox"
     checkbox.value = algo
     checkbox.name = "algorithms"
+    checkbox.id = algo
 
     const label = document.createElement('label')
     label.innerText = algo
+    label.for = algo
 
     container.append(checkbox, label)
     algoSelect.appendChild(container)
