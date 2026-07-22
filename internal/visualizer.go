@@ -6,10 +6,15 @@ import (
 	"os"
 	p "pathfinder/pathfinding"
 	"sort"
+	"strconv"
 	"strings"
 )
 
 func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
+	if len(turnData) > 50 {
+		trains = getHighestTrainID(turnData)
+	}
+
 	err := createSVG(n, r, trains)
 	if err != nil {
 		return err
@@ -232,9 +237,25 @@ func createJSTurns(turnData []string) error {
 	}
 	defer f.Close()
 	fmt.Fprintln(f, "const turns = [")
-	for _, turn := range turnData {
+	for i, turn := range turnData {
 		fmt.Fprintf(f, "	%q,\n", turn)
+		if i == 50 {
+			break
+		}
 	}
 	fmt.Fprintln(f, "];")
 	return nil
+}
+
+func getHighestTrainID(turnData []string) int {
+	highest := 0
+	lineSplit := strings.Split(turnData[50], " ")
+	for _, trainObj := range lineSplit {
+		trainID := strings.Split(trainObj, "-")
+		trainIDInt, _ := strconv.Atoi(trainID[0][1:])
+		if trainIDInt > highest {
+			highest = trainIDInt
+		}
+	}
+	return highest
 }
