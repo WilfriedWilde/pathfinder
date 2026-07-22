@@ -46,7 +46,7 @@ Visualization (including turn-by-turn animated trains) shown on the server (so l
 
 Benchmarking different algorithms by both runtime and by length of solution in turns.  
 
-## Algorithms used:<br>
+## Algorithms used<br>
 - "Greedy" BFS: Find shortest path, remove used stations, repeat.
 - "Max-Flow" Edmonds-Karp and Dinic: Find shortest path, try to augment by finding shortest-by-edges augmenting paths from start to end, thus increasing the flow.  
 Dinic being more clever in the way it does this (repeated DFS), resulting in faster runtime.
