@@ -15,9 +15,9 @@ stations:
 start, 20, 20
 short_1, 30, 20
 short_2, 40, 20
-end, 50, 20
 top_long_1, 25, 10
 top_long_2, 35, 10
 bottom_long_1, 35, 30
 bottom_long_2, 45, 30
+end, 50, 20
 

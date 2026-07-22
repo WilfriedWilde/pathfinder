@@ -1,10 +1,11 @@
 stations:
-one,1,1
 two,2,2
+one,1,1
 three,3,3
-four,4,4
 five,5,5
 six,6,6
+four,4,4
+
 
 connections:
 two-three

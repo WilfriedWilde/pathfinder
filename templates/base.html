@@ -33,48 +33,44 @@
     </form>
 
     {{ if .ErrorMessage}}
-    <section id="error-container">
-        <h4 class="label">error</h4>
-        <p>{{ .ErrorMessage }}</p>
-    </section>
+        <p id="error-message">{{ .ErrorMessage }}</p>
     {{ else }}
-    <section id="summary-container">
-        <h4 class="label">run summary</h4>
-        <ul id="results">
-        {{ range .Summaries }}
-            <li>
-                <p>{{ .Name }}</p>
-                <p>{{ .MaxTurns }}</p>
-                <p>{{ .TimeTaken }}</p>
-            </li>
-        {{ end }}
-        </ul>
-    </section>
-    {{ end }}
-
-    {{ if .GraphVisibility  }}
-    <object id="map" data="/output/map.svg" type="image/svg+xml"></object>
-    <div id="controls">
-        <button id="prev">Previous</button>
-        <span id="turnLabel"></span>
-        <button id="next">Next</button>
-    </div>
-    {{ else }}
-    <section id="routes-container">
-        <h4 class="label">routes</h4>
-        <ul id="routes-list">
-            {{ range $routeID, $route := .Routes}}
-            <li>
-                <h5>flow {{ increment1 $routeID }}</h5>
-                <ul class="route-stations">
-                    {{ range $stationID, $station := $route }}
-                    <li>{{ increment1 $stationID }}. {{ $station }}</li>
-                    {{ end }}
-                </ul>
-            </li>
+        <section id="summary-container">
+            <h4 class="label">run summary</h4>
+            <ul id="results">
+            {{ range .Summaries }}
+                <li>
+                    <p>{{ .Name }}</p>
+                    <p>{{ .MaxTurns }}</p>
+                    <p>{{ .TimeTaken }}</p>
+                </li>
             {{ end }}
-        </ul>
-    </section>
+            </ul>
+        </section>
+        {{ if .GraphVisibility  }}
+        <object id="map" data="/output/map.svg" type="image/svg+xml"></object>
+        <div id="controls">
+            <button id="prev">Previous</button>
+            <span id="turnLabel"></span>
+            <button id="next">Next</button>
+        </div>
+        {{ else }}
+        <section id="routes-container">
+            <h4 class="label">routes</h4>
+            <ul id="routes-list">
+                {{ range $routeID, $route := .Routes}}
+                <li>
+                    <h5>flow {{ increment1 $routeID }}</h5>
+                    <ul class="route-stations">
+                        {{ range $stationID, $station := $route }}
+                        <li>{{ increment1 $stationID }}. {{ $station }}</li>
+                        {{ end }}
+                    </ul>
+                </li>
+                {{ end }}
+            </ul>
+        </section>
+        {{ end }}
     {{ end }}
 
 </main>

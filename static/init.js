@@ -104,6 +104,7 @@ function populateSelectStation(file) {
         endSelect.value = selectedEnd;
         selectedEnd = null;
     } else {
-        Array.from(endSelect.querySelectorAll('option'))[1].selected = true
+        const options = Array.from(endSelect.querySelectorAll('option'))
+        options[options.length-1].selected = true
     }
 }
