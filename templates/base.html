@@ -70,15 +70,16 @@
             </div>
         </section>
         {{ else }}
+        <p id="nograph-message">Input file too <span class="red bold">big</span> for graph generation :(<br>Here are all the possible sets of <span class="green bold">routes</span> instead!</p>
         <section id="routes-container">
             <h4 class="label">routes</h4>
             <ul id="routes-list">
                 {{ range $routeID, $route := .Routes}}
-                <li>
+                <li class="route">
                     <h5>flow {{ increment1 $routeID }}</h5>
                     <ul class="route-stations">
                         {{ range $stationID, $station := $route }}
-                        <li>{{ increment1 $stationID }}. {{ $station }}</li>
+                        <li>{{ increment1 $stationID }}. <span class="green bold">{{ $station }}</span></li>
                         {{ end }}
                     </ul>
                 </li>
