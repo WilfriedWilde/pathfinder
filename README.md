@@ -27,6 +27,8 @@ The server mode is accessible at `http://localhost:8081/`
 - Select one or more pathfinding algorithms to use
 - Click run
 
+On server mode, the actual turn printouts are still available on the usual terminal, if required.
+
 ## Additional features<br>
 ### Proposed bonuses:<br>
 Advanced error handling:  Should not have any generic errors left, they all tell what went wrong.
