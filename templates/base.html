@@ -40,6 +40,7 @@
     {{ if .ErrorMessage}}
         <p id="error-message">{{ .ErrorMessage }}</p>
     {{ else }}
+        {{ if not .InitialState }}
         <section id="summary-container">
             <h4 class="label">run summary</h4>
             <ul id="summaries">
@@ -60,6 +61,7 @@
             {{ end }}
             </ul>
         </section>
+        {{ end }}
         {{ if .GraphVisibility  }}
         <section id="map-container">
             <object id="map" data="/output/map.svg" type="image/svg+xml"></object>
@@ -69,7 +71,7 @@
                 <button id="next">Next</button>
             </div>
         </section>
-        {{ else }}
+        {{ else if not .InitialState }}
         <p id="nograph-message">Input file too <span class="red bold">big</span> for graph generation :(<br>Here are all the possible sets of <span class="green bold">routes</span> instead!</p>
         <section id="routes-container">
             <h4 class="label">routes</h4>

@@ -13,7 +13,8 @@ async function fetchInitData() {
 const initData = await fetchInitData()
 
 const params = new URLSearchParams(window.location.search);
-const selectedFile = params.get("file") || "1.txt";
+console.log(params.get("file"))
+const selectedFile = initData.names.includes(params.get("file")) ? params.get("file") : "1.txt";
 let selectedStart = params.get("start");
 let selectedEnd = params.get("end")
 const selectedTrains = params.get("trains") || "10";

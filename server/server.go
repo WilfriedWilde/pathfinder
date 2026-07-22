@@ -37,7 +37,9 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error parsing form:", err)
 	}
 
-	data := i.PageContent{}
+	data := i.PageContent{
+		InitialState: true,
+	}
 
 	if len(r.Form) != 0 {
 		args := make([]string, 5)

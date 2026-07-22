@@ -17,6 +17,7 @@ type PageContent struct {
 	Summaries       []Summary
 	Routes          [][]string
 	ErrorMessage    string
+	InitialState    bool
 }
 
 type Config struct {
