@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	i "pathfinder/internal"
 	"slices"
 )
@@ -83,14 +82,13 @@ func (s *ServerInit) GetAllFilesData() error {
 	s.FileStations = make(map[string][]string, 0)
 
 	for _, file := range txtFiles {
-		name := filepath.Base(file)
-		s.FileNames = append(s.FileNames, name)
+		s.FileNames = append(s.FileNames, file)
 
 		stations, err := i.GetStationNames("networks/" + file)
 		if err != nil {
 			return fmt.Errorf("Error trying to fetch stations from %s: %v", file, err)
 		}
-		s.FileStations[name] = stations
+		s.FileStations[file] = stations
 	}
 	slices.Sort(s.FileNames)
 
