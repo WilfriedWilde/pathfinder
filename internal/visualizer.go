@@ -78,7 +78,7 @@ func createSVG(n p.Network, r RoutesUsed, trains int) error {
 
 	f, err := os.Create("output/map.svg")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating map.svg: %v", err)
 	}
 	defer f.Close()
 
@@ -239,7 +239,7 @@ func scaleY(y, minY int, s float64) float64 {
 func createJSTurns(turnData []string) error {
 	f, err := os.Create("output/turns.js")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating turns.js: %v", err)
 	}
 	defer f.Close()
 	fmt.Fprintln(f, "const turns = [")
@@ -261,7 +261,7 @@ func getHighestTrainID(turnData []string) (int, error) {
 		trainID := strings.Split(trainObj, "-")
 		trainIDInt, err := strconv.Atoi(trainID[0][1:]) // ideally don't do this
 		if err != nil {
-			return 0, fmt.Errorf("Malformed train-station string in the output (CreateMap-getHighestTrainID)")
+			return 0, fmt.Errorf("Malformed train-station string in the output (CreateMap-getHighestTrainID): %v", err)
 		}
 		if trainIDInt > highest {
 			highest = trainIDInt
