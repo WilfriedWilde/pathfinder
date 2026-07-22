@@ -2,12 +2,13 @@ package internal
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 )
 
-func GetStationNames(fileName string) []string {
-	ret := []string{}
+func GetStationNames(fileName string) ([]string, error) {
+	stationNames := []string{}
 	file, _ := os.Open(fileName)
 	defer file.Close()
 
@@ -40,10 +41,13 @@ func GetStationNames(fileName string) []string {
 
 			stationName := strings.TrimSpace(split[0])
 
-			ret = append(ret, stationName)
-
+			stationNames = append(stationNames, stationName)
 		}
-
 	}
-	return ret
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("Scanner error reading %s: %s", fileName, err.Error())
+	}
+
+	return stationNames, nil
 }

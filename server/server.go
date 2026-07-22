@@ -92,7 +92,11 @@ func (s *ServerInit) GetAllFilesData() error {
 	slices.Sort(s.FileNames)
 
 	for _, name := range s.FileNames {
-		s.FileStations[name] = append(s.FileStations[name], i.GetStationNames(fileNames[name])...)
+		statioNames, err := i.GetStationNames(fileNames[name])
+		if err != nil {
+			return err
+		}
+		s.FileStations[name] = append(s.FileStations[name], statioNames...)
 	}
 
 	return nil
