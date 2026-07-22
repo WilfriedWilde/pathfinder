@@ -6,19 +6,15 @@ A CLI (/localhost) tool that calculates the minimum number of turns required to 
 
 It then prints out the train movements, turn by turn.
 
-## Setup <br>
+## Setup and Usage <br>
 
 `git clone https://gitea.kood.tech/jyrkikarhunen/pathfinder`
 
 `cd pathfinder`
 
-`go run . [INPUTFILEPATH] [STARTSTATION] [ENDSTATION] [TRAINNUMBER]` for the default mode.  
+`go run . [INPUTFILEPATH] [STARTSTATION] [ENDSTATION] [TRAINNUMBER]` for the default CLI mode.  
 
 `go run . -s` to launch the server at http://localhost:8081/  
-
-## Usage<br>
-
-For the CLI mode, just run it with the arguments.
 
 The server mode is accessible at `http://localhost:8081/`  
 - Select an input file from the list (can manually add in your own files into networks/)  
