@@ -73,6 +73,9 @@ svgObject.addEventListener("load", () => {
 
         prevButton.disabled = currentTurn === 0;
         nextButton.disabled = currentTurn === turns.length - 1;
+
+        prevButton.style.color = currentTurn === 0 ? "gray" : "#0A0A0A";
+        nextButton.style.color = currentTurn === turns.length - 1 ? "gray" : "#0A0A0A";
     }
 
     let trainAnimations = {};

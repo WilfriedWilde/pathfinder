@@ -50,15 +50,25 @@ body {
 main {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
+	gap: var(--spacing-6);
 	width: 100%;
 	height: 100%;
 	color: var(--color-text);
+	padding: var(--spacing-4) var(--spacing-3);
+}
+
+#title {
+	font-family: var(--font-header);
+	font-size: var(--font-size-h2);
+	text-transform: uppercase;
 }
 
 .label {
 	font-family: var(--font-header);
 	font-size: var(--font-size-h6);
 	text-transform: uppercase;
+	text-align: center;
 }
 
 select,
@@ -92,7 +102,7 @@ form {
 #inputs-container {
 	display: flex;
 	width: 100%;
-	padding: var(--spacing-5);
+	padding: 0 var(--spacing-5);
 }
 
 .form-field {
@@ -174,39 +184,119 @@ form button:hover {
 	cursor: pointer;
 }
 
+#error-message {
+	font-family: var(--font-header);
+	font-size: var(--font-size-h6);
+	color: red;
+}
+
+/* ---------- SUMMARY ---------- */
+
+#summary-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-2);
+	width: 100%;
+}
+
+#summaries {
+	display: flex;
+    width: 100%;
+    justify-content: center;
+	align-items: center;
+	gap: var(--spacing-1);
+    list-style: none;
+}
+
+#summaries li {
+	display: flex;
+    flex-direction: column;
+	align-items: center;
+    gap: var(--spacing-1);
+	font-family: var(--font-body);
+	padding: var(--spacing-2);
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 5px;
+}
+
+.summary-algo {
+	font-weight: 600;
+	font-size: var(--font-size-h6);
+	text-transform: capitalize;
+}
+
+.summary-data-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-1);
+	background-color: var(--color-surface);
+	color: var(--color-background);
+}
+
+.summary-data-entry {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-2);
+	padding: var(--spacing-2);
+	border-radius: 10px;
+	background-color: var(--color-accent);
+}
+
+.summary-data-entry img {
+	width: var(--spacing-4);
+
+}
+
 /* ----------- GRAPH ----------- */
 
-.station text {	display: none; }
+#map.station text {	display: none; }
 
-.station:hover text {display: block; }
+#map.station:hover text {display: block; }
 
-.train text {	display: none; }
+#map.train text {	display: none; }
 
-.train:hover text {display: block; }
+#map.train:hover text {display: block; }
+
+#map-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+}
 
 #map {
-	width: 100vw;
-	height: 100vh;
+	width: 70vw;
 	display: block;
+	background-color: var(--color-text);
+	border-radius: 5px;
 }
 
 #controls {
-	position: fixed;
-	bottom: 20px;
-	left: 50%;
-	transform: translateX(-50%);
+	position: absolute;
 	display: flex;
 	align-items: center;
-	gap: 16px;
-	font-family: Arial, sans-serif;
+	gap: var(--spacing-4);
+	bottom: var(--spacing-0)
 }
 
 #controls button {
-	font-size: 14px;
+	font-family: var(--font-body);
+	font-size: var(--font-size-p);
+	border-radius: 5px;
+	color: var(--color-text);
 	cursor: pointer;
+	padding: var(--spacing-2);
+	border: none;
+	transition: 0.3s ease;
+}
+
+#controls button:hover {
+	background-color: var(--color-primary);
 }
 
 #turnLabel {
-	min-width: 100px;
 	text-align: center;
+    color: var(--color-background);
+    font-family: var(--font-header);
 }
