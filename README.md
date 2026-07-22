@@ -18,7 +18,7 @@ Then either
 
 or
 
-`go run . -s` to launch the server at http://localhost:8081/  
+`go run . -s` to launch the server mode. 
 
 The server mode is accessible at `http://localhost:8081/`  
 - Select an input file from the list (can manually add in your own files into networks/)  
