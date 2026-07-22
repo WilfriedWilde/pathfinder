@@ -13,7 +13,6 @@ async function fetchInitData() {
 const initData = await fetchInitData()
 
 const params = new URLSearchParams(window.location.search);
-console.log(params.get("file"))
 const selectedFile = initData.names.includes(params.get("file")) ? params.get("file") : "1.txt";
 let selectedStart = params.get("start");
 let selectedEnd = params.get("end")
@@ -28,6 +27,13 @@ const trainSelect = document.getElementById("select-train-numbers")
 trainSelect.value = selectedTrains;
 
 const algoSelect = document.getElementById("select-algorithm")
+const algoLabels = {
+    dijkstra: "Dijkstra + Potentials (MCMF)",
+    greedy: "Greedy BFS",
+    edmonds: "Edmonds-Karp (Maxflow)",
+    dinic: "Dinic (Maxflow)",
+    bellman: "Bellman-Ford (MCMF) (careful with highway)"
+}
 
 console.log(initData)
 initData.names.forEach(name => {
@@ -64,7 +70,7 @@ initData.algorithms.forEach(algo => {
     checkbox.id = algo
 
     const label = document.createElement('label')
-    label.innerText = algo
+    label.innerText = algoLabels[algo] || algo;
     label.for = algo
 
     container.append(checkbox, label)

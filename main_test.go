@@ -522,6 +522,17 @@ func TestRunLogic(t *testing.T) {
 		expectedRouteCount int
 	}{
 		{
+			name: "1.txt - 2 trains",
+			args: []string{
+				"networks/1.txt",
+				"waterloo",
+				"st_pancras",
+				"2",
+			},
+			maxTurns:           2,
+			expectedRouteCount: 2,
+		},
+		{
 			name: "1.txt - 3 trains",
 			args: []string{
 				"networks/1.txt",
