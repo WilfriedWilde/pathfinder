@@ -10,12 +10,17 @@ import (
 	"strings"
 )
 
+// CreateMap handles the creation of map.svg and turns.js into the output/ folder
 func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
+	var err error
 	if len(turnData) > 50 {
-		trains = getHighestTrainID(turnData)
+		trains, err = getHighestTrainID(turnData) // limit our visualization to the first 50 turns, if the actual solution takes longer
+		if err != nil {
+			return err
+		}
 	}
 
-	err := createSVG(n, r, trains)
+	err = createSVG(n, r, trains)
 	if err != nil {
 		return err
 	}
@@ -61,6 +66,7 @@ func addStartStationTurn(turnData []string, start string) []string {
 	return turnData
 }
 
+// createSVG creates a populated map.svg file in the output/ folder
 func createSVG(n p.Network, r RoutesUsed, trains int) error {
 
 	stationColors, edgeColors := buildRouteColors(r)
@@ -247,15 +253,19 @@ func createJSTurns(turnData []string) error {
 	return nil
 }
 
-func getHighestTrainID(turnData []string) int {
+// getHighestTrainID returns the highest actively moving trainID on turn 50, to limit map.svg/turns.js size
+func getHighestTrainID(turnData []string) (int, error) {
 	highest := 0
 	lineSplit := strings.Split(turnData[50], " ")
 	for _, trainObj := range lineSplit {
 		trainID := strings.Split(trainObj, "-")
-		trainIDInt, _ := strconv.Atoi(trainID[0][1:])
+		trainIDInt, err := strconv.Atoi(trainID[0][1:]) // ideally don't do this
+		if err != nil {
+			return 0, fmt.Errorf("Malformed train-station string in the output (CreateMap-getHighestTrainID)")
+		}
 		if trainIDInt > highest {
 			highest = trainIDInt
 		}
 	}
-	return highest
+	return highest, nil
 }
