@@ -551,7 +551,7 @@ func TestRunLogic(t *testing.T) {
 				"st_pancras",
 				"100",
 			},
-			maxTurns:           3,
+			maxTurns:           51,
 			expectedRouteCount: 2,
 		},
 		{

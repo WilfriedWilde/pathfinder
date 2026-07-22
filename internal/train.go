@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-// divert returns a slice of the usable routes with ideal number of trains preassigned and the calculated turn count
+// divert returns a slice of the usable routes with ideal number of trains preassigned, and the calculated turn count
 func divert(routes [][]string, trains int) ([]p.TrainRoute, int) {
 	if len(routes) == 0 {
 		return nil, -1
@@ -55,7 +55,7 @@ func divert(routes [][]string, trains int) ([]p.TrainRoute, int) {
 	return trainRoutes, trainRoutes[0].RouteLength + (trainRoutes[0].Trains - 1)
 }
 
-// distributeTrains divides the leftover trains across the routes in use once the routes match in (length+trains assigned)
+// distributeTrains evenly divides the leftover trains across the routes in use once the routes match in (length+trains assigned), remainders get assigned to the shortest routes
 func distributeTrains(trains, groupSize int, trainRoutes []p.TrainRoute) {
 	increment := trains / groupSize
 	remainder := trains % groupSize
