@@ -1,3 +1,18 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+:root {
+	--color-background: #0A0A0A;
+	--color-text: #FAFAF8;
+	--color-primary: #1B1BFF;
+	--color-accent: #00FF9C;
+	--color-surface: #1A1A1A;
+	--color-border: #2C2C2C;
+}
+
 .station text {	display: none; }
 
 .station:hover text {display: block; }

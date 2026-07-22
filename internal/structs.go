@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Result struct {
+type Summary struct {
 	Name        string // algorithm name
 	TrainRoutes []p.TrainRoute
 	MaxTurns    int
@@ -14,8 +14,8 @@ type Result struct {
 
 type PageContent struct {
 	GraphVisibility bool
-	Results         []Result
-	Routes          []string
+	Summaries       []Summary
+	Routes          [][]string
 	ErrorMessage    string
 }
 

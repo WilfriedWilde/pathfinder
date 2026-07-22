@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	p "pathfinder/pathfinding"
 	"slices"
 )
@@ -18,7 +19,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 
 	content := PageContent{
 		GraphVisibility: true,
-		Results:         make([]Result, 0),
+		Summaries:       make([]Summary, 0),
 	}
 
 	if NumLines > 25000 {
@@ -33,15 +34,15 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.Dijkstra)
 		fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
-
-		result := Result{
+		fmt.Println(trainRoutes)
+		summary := Summary{
 			Name:        "dijkstra",
 			TrainRoutes: trainRoutes,
 			MaxTurns:    maxTurnsDijkstra,
 			TimeTaken:   dijkstraTime,
 		}
 
-		content.Results = append(content.Results, result)
+		content.Summaries = append(content.Summaries, summary)
 	}
 
 	if slices.Contains(algorithms, "bellman") {
@@ -49,14 +50,14 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		fastestMCMFRoutes := GetFastestRouteSet(mcmfRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsMCMF := divert(fastestMCMFRoutes, config.NumTrains)
 
-		result := Result{
+		summary := Summary{
 			Name:        "bellman",
 			TrainRoutes: trainRoutes,
 			MaxTurns:    maxTurnsMCMF,
 			TimeTaken:   bellFordTime,
 		}
 
-		content.Results = append(content.Results, result)
+		content.Summaries = append(content.Summaries, summary)
 	}
 
 	if slices.Contains(algorithms, "dinic") {
@@ -64,14 +65,14 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		fastestDinicRoutes := GetFastestRouteSet(dinicRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsDinic := divert(fastestDinicRoutes, config.NumTrains)
 
-		result := Result{
+		summary := Summary{
 			Name:        "dinic",
 			TrainRoutes: trainRoutes,
 			MaxTurns:    maxTurnsDinic,
 			TimeTaken:   dinicTime,
 		}
 
-		content.Results = append(content.Results, result)
+		content.Summaries = append(content.Summaries, summary)
 	}
 
 	if slices.Contains(algorithms, "edmonds") {
@@ -79,40 +80,43 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsEK := divert(fastestEKRoutes, config.NumTrains)
 
-		result := Result{
+		summary := Summary{
 			Name:        "edmonds",
 			TrainRoutes: trainRoutes,
 			MaxTurns:    maxTurnsEK,
 			TimeTaken:   ekTime,
 		}
 
-		content.Results = append(content.Results, result)
+		content.Summaries = append(content.Summaries, summary)
 	}
 
 	if slices.Contains(algorithms, "greedy") {
 		repeatedBFSRoutes, _, bfsTime := network.GreedyBFS(config.StartStation, config.EndStation)
 		trainRoutes, maxTurnsBFS := divert(repeatedBFSRoutes, config.NumTrains)
 
-		result := Result{
+		summary := Summary{
 			Name:        "greedy",
 			TrainRoutes: trainRoutes,
 			MaxTurns:    maxTurnsBFS,
 			TimeTaken:   bfsTime,
 		}
 
-		content.Results = append(content.Results, result)
+		content.Summaries = append(content.Summaries, summary)
+	}
+
+	routes := [][]string{}
+	for _, v := range content.Summaries[0].TrainRoutes {
+		routes = append(routes, v.Route)
 	}
 
 	if content.GraphVisibility {
-		routes := [][]string{}
-		for _, v := range content.Results[0].TrainRoutes {
-			routes = append(routes, v.Route)
-		}
-		turnData, err := PrintTurns(content.Results[0].TrainRoutes, content.Results[0].MaxTurns)
+		turnData, err := PrintTurns(content.Summaries[0].TrainRoutes, content.Summaries[0].MaxTurns)
 		if err != nil {
 			return PageContent{}, err
 		}
 		CreateMap(network, RoutesUsed{config.StartStation, config.EndStation, routes}, turnData, config.NumTrains, false)
+	} else {
+		content.Routes = routes
 	}
 
 	return content, nil

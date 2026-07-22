@@ -25,7 +25,7 @@ func TestGetAndValidateUserInput(t *testing.T) {
 			err:    "Error: number of train should be positive integer",
 		},
 		"Number of train is negative": {
-			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "0"},
+			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "-232"},
 			output: i.Config{},
 			err:    "Error: number of train should be positive integer",
 		},

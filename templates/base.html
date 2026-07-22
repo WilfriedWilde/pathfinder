@@ -7,35 +7,80 @@
 
 <main>
     <form action="/">
-        <select id="select-file-names" name="file"></select>
-        <select id="select-start-station" name="start"></select>
-        <select id="select-end-station" name="end"></select>
-        <input type="number" id="select-train-numbers" min="1" max="1000000" value="10" name="trains">
-        <div id="select-algorithm"></div>
+        <section id="inputs-container">
+            <div class="form-field">
+                <h4 class="label">input file</h4>
+                <select id="select-file-names" name="file"></select>
+            </div>
+            <div class="form-field">
+                <h4 class="label">start station</h4>
+                <select id="select-start-station" name="start"></select>
+            </div>
+            <div class="form-field">
+                <h4 class="label">end station</h4>
+                <select id="select-end-station" name="end"></select>
+            </div>
+            <div class="form-field">
+                <h4 class="label">number of trains</h4>
+                <input type="number" id="select-train-numbers" min="1" max="1000000" value="10" name="trains">
+            </div>
+            <div class="form-field">
+                <h4 class="label">algorithms</h4>
+                <div id="select-algorithm"></div>
+            </div>
+        </section> 
         <button type="submit">Run</button>
     </form>
-    <ul id="results">
-        {{ range .Results }}
+
+    {{ if .ErrorMessage}}
+    <section id="error-container">
+        <h4 class="label">error</h4>
+        <p>{{ .ErrorMessage }}</p>
+    </section>
+    {{ else }}
+    <section id="summary-container">
+        <h4 class="label">run summary</h4>
+        <ul id="results">
+        {{ range .Summaries }}
             <li>
                 <p>{{ .Name }}</p>
                 <p>{{ .MaxTurns }}</p>
                 <p>{{ .TimeTaken }}</p>
             </li>
         {{ end }}
-    </ul>
+        </ul>
+    </section>
+    {{ end }}
 
-{{ if .GraphVisibility  }}
-<object id="map" data="/output/map.svg" type="image/svg+xml"></object>
+    {{ if .GraphVisibility  }}
+    <object id="map" data="/output/map.svg" type="image/svg+xml"></object>
+    <div id="controls">
+        <button id="prev">Previous</button>
+        <span id="turnLabel"></span>
+        <button id="next">Next</button>
+    </div>
+    {{ else }}
+    <section id="routes-container">
+        <h4 class="label">routes</h4>
+        <ul id="routes-list">
+            {{ range $routeID, $route := .Routes}}
+            <li>
+                <h5>flow {{ increment1 $routeID }}</h5>
+                <ul class="route-stations">
+                    {{ range $stationID, $station := $route }}
+                    <li>{{ increment1 $stationID }}. {{ $station }}</li>
+                    {{ end }}
+                </ul>
+            </li>
+            {{ end }}
+        </ul>
+    </section>
+    {{ end }}
 
-<div id="controls">
-	<button id="prev">Previous</button>
-	<span id="turnLabel"></span>
-	<button id="next">Next</button>
-</div>
-{{ end }}
 </main>
 
 <script src="/static/init.js" type="module"></script>
+
 {{ if .GraphVisibility  }}
 <script src="/output/turns.js"></script>
 <script src="/static/map.js"></script>

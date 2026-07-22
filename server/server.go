@@ -37,7 +37,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := i.PageContent{}
-	fmt.Println(r.Form)
+
 	if len(r.Form) != 0 {
 		args := make([]string, 5)
 		args[0] = "networks/" + r.Form["file"][0]
@@ -46,8 +46,6 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		args[3] = r.Form["trains"][0]
 		args[4] = "server"
 		algorithms := r.Form["algorithms"]
-		fmt.Println(len(args))
-		fmt.Println(args)
 
 		data, err = i.RunLogic(args, algorithms)
 		if err != nil {
@@ -55,7 +53,11 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmp, err := template.ParseFiles("templates/base.html")
+	funcMap := template.FuncMap{
+		"increment1": func(i int) int { return i + 1 },
+	}
+
+	tmp, err := template.New("base.html").Funcs(funcMap).ParseFiles("templates/base.html")
 	if err != nil {
 		log.Println("Error parsing template:", err)
 	}
@@ -74,7 +76,6 @@ func (s *ServerInit) GetAllFilesData() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(txtFiles)
 
 	fileNames := make(map[string]string)
 
