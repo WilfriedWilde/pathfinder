@@ -109,6 +109,9 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 	}
 
 	routes := [][]string{}
+	if len(content.Summaries) == 0 {
+		return PageContent{}, fmt.Errorf("No valid pathfinder algorithms in input.")
+	}
 	for _, v := range content.Summaries[0].TrainRoutes {
 		routes = append(routes, v.Route)
 	}

@@ -6,19 +6,19 @@ A CLI (/localhost) tool that calculates the minimum number of turns required to 
 
 It then prints out the train movements, turn by turn.
 
-## Setup <br>
+## Setup and Usage <br>
 
 `git clone https://gitea.kood.tech/jyrkikarhunen/pathfinder`
 
 `cd pathfinder`
 
-`go run . [INPUTFILEPATH] [STARTSTATION] [ENDSTATION] [TRAINNUMBER]` for the default mode.  
+Then either
 
-`go run . -s` to launch the server at http://localhost:8081/  
+`go run . [INPUTFILEPATH] [STARTSTATION] [ENDSTATION] [TRAINNUMBER]` for the default CLI mode.  
 
-## Usage<br>
+or
 
-For the CLI mode, just run it with the arguments.
+`go run . -s` to launch the server mode. 
 
 The server mode is accessible at `http://localhost:8081/`  
 - Select an input file from the list (can manually add in your own files into networks/)  
@@ -45,3 +45,10 @@ Local server implementation.
 Visualization (including turn-by-turn animated trains) shown on the server (so long as the input file is small enough, up to 25 thousand stations + connections combined).
 
 Benchmarking different algorithms by both runtime and by length of solution in turns.  
+
+## Algorithms used<br>
+- "Greedy" BFS: Find shortest path, remove used stations, repeat.
+- "Max-Flow" Edmonds-Karp and Dinic: Find shortest path, try to augment by finding shortest-by-edges augmenting paths from start to end, thus increasing the flow.  
+Dinic being more clever in the way it does this (repeated DFS), resulting in faster runtime.
+- "Min-Cost Max-Flow" Bellman-Ford and Dijkstra + Potentials: Same as above, but shortest-by-length instead, often resulting in better set of routes found.  
+Bellman-Ford falls off fast on bigger inputs, potentially taking minutes to get a result, Dijkstra remains fast.
