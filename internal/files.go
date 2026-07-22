@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// GetStationNames returns the names of all of the stations in the file it's called with
+//
+// Basically a trimmed version of the full validation function for initializing server data.
 func GetStationNames(fileName string) ([]string, error) {
 	stationNames := []string{}
 	file, _ := os.Open(fileName)

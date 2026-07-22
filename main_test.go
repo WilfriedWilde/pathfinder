@@ -513,3 +513,184 @@ func TestBFS(t *testing.T) {
 		})
 	}
 }
+
+func TestRunLogic(t *testing.T) {
+	tests := []struct {
+		name               string
+		args               []string
+		maxTurns           int
+		expectedRouteCount int
+	}{
+		{
+			name: "1.txt - 3 trains",
+			args: []string{
+				"networks/1.txt",
+				"waterloo",
+				"st_pancras",
+				"3",
+			},
+			maxTurns:           3,
+			expectedRouteCount: 2,
+		},
+		{
+			name: "1.txt - 4 trains",
+			args: []string{
+				"networks/1.txt",
+				"waterloo",
+				"st_pancras",
+				"4",
+			},
+			maxTurns:           3,
+			expectedRouteCount: 2,
+		},
+		{
+			name: "1.txt - 100 trains",
+			args: []string{
+				"networks/1.txt",
+				"waterloo",
+				"st_pancras",
+				"100",
+			},
+			maxTurns:           51,
+			expectedRouteCount: 2,
+		},
+		{
+			name: "1.txt - 1 train",
+			args: []string{
+				"networks/1.txt",
+				"waterloo",
+				"st_pancras",
+				"1",
+			},
+			maxTurns:           3,
+			expectedRouteCount: 1,
+		},
+		{
+			name: "2.txt",
+			args: []string{
+				"networks/2.txt",
+				"bond_square",
+				"space_port",
+				"4",
+			},
+			maxTurns: 6,
+		},
+		{
+			name: "3.txt",
+			args: []string{
+				"networks/3.txt",
+				"jungle",
+				"desert",
+				"10",
+			},
+			maxTurns: 8,
+		},
+		{
+			name: "4.txt",
+			args: []string{
+				"networks/4.txt",
+				"beginning",
+				"terminus",
+				"20",
+			},
+			maxTurns: 11,
+		},
+		{
+			name: "5.txt",
+			args: []string{
+				"networks/5.txt",
+				"two",
+				"four",
+				"4",
+			},
+			maxTurns: 6,
+		},
+		{
+			name: "6.txt",
+			args: []string{
+				"networks/6.txt",
+				"beethoven",
+				"part",
+				"9",
+			},
+			maxTurns: 6,
+		},
+		{
+			name: "7.txt",
+			args: []string{
+				"networks/7.txt",
+				"small",
+				"large",
+				"9",
+			},
+			maxTurns: 8,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			content, err := i.RunLogic(tt.args, []string{"dijkstra"})
+			if err != nil {
+				t.Fatalf("RunLogic() error = %v", err)
+			}
+
+			got := content.Summaries[0].MaxTurns
+			if got > tt.maxTurns {
+				t.Errorf("MaxTurns = %d, want <= %d", got, tt.maxTurns)
+			}
+			if tt.expectedRouteCount > 0 {
+				if len(content.Summaries[0].TrainRoutes) != tt.expectedRouteCount {
+					t.Errorf("RouteCount = %d, want %d", len(content.Summaries[0].TrainRoutes), tt.expectedRouteCount)
+				}
+			}
+		})
+	}
+}
+
+func TestPrintTurns(t *testing.T) {
+	tests := []struct {
+		name     string
+		routes   []p.TrainRoute
+		maxTurns int
+		expected []string
+	}{
+		{
+			name: "mandatory task test",
+			routes: []p.TrainRoute{
+				{
+					RouteLength: 2,
+					Route: []string{
+						"victoria",
+						"st_pancras",
+					},
+					Trains: 2,
+				},
+				{
+					RouteLength: 2,
+					Route: []string{
+						"euston",
+						"st_pancras",
+					},
+					Trains: 2,
+				},
+			},
+			maxTurns: 3,
+			expected: []string{
+				"T1-victoria T2-euston",
+				"T1-st_pancras T2-st_pancras T3-victoria T4-euston",
+				"T3-st_pancras T4-st_pancras",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := i.PrintTurns(tt.routes, tt.maxTurns)
+			if err != nil {
+				t.Fatalf("PrintTurns() error = %v", err)
+			}
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("PrintTurns() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

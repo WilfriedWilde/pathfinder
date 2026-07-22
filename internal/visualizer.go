@@ -6,11 +6,21 @@ import (
 	"os"
 	p "pathfinder/pathfinding"
 	"sort"
+	"strconv"
 	"strings"
 )
 
+// CreateMap handles the creation of map.svg and turns.js into the output/ folder
 func CreateMap(n p.Network, r RoutesUsed, turnData []string, trains int, labels bool) error {
-	err := createSVG(n, r, trains)
+	var err error
+	if len(turnData) > 50 {
+		trains, err = getHighestTrainID(turnData) // limit our visualization to the first 50 turns, if the actual solution takes longer
+		if err != nil {
+			return err
+		}
+	}
+
+	err = createSVG(n, r, trains)
 	if err != nil {
 		return err
 	}
@@ -56,6 +66,7 @@ func addStartStationTurn(turnData []string, start string) []string {
 	return turnData
 }
 
+// createSVG creates a populated map.svg file in the output/ folder
 func createSVG(n p.Network, r RoutesUsed, trains int) error {
 
 	stationColors, edgeColors := buildRouteColors(r)
@@ -67,7 +78,7 @@ func createSVG(n p.Network, r RoutesUsed, trains int) error {
 
 	f, err := os.Create("output/map.svg")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating map.svg: %v", err)
 	}
 	defer f.Close()
 
@@ -228,13 +239,33 @@ func scaleY(y, minY int, s float64) float64 {
 func createJSTurns(turnData []string) error {
 	f, err := os.Create("output/turns.js")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating turns.js: %v", err)
 	}
 	defer f.Close()
 	fmt.Fprintln(f, "const turns = [")
-	for _, turn := range turnData {
+	for i, turn := range turnData {
 		fmt.Fprintf(f, "	%q,\n", turn)
+		if i == 50 {
+			break
+		}
 	}
 	fmt.Fprintln(f, "];")
 	return nil
+}
+
+// getHighestTrainID returns the highest actively moving trainID on turn 50, to limit map.svg/turns.js size
+func getHighestTrainID(turnData []string) (int, error) {
+	highest := 0
+	lineSplit := strings.Split(turnData[50], " ")
+	for _, trainObj := range lineSplit {
+		trainID := strings.Split(trainObj, "-")
+		trainIDInt, err := strconv.Atoi(trainID[0][1:]) // ideally don't do this
+		if err != nil {
+			return 0, fmt.Errorf("Malformed train-station string in the output (CreateMap-getHighestTrainID): %v", err)
+		}
+		if trainIDInt > highest {
+			highest = trainIDInt
+		}
+	}
+	return highest, nil
 }

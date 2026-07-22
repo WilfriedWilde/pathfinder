@@ -6,7 +6,11 @@ import (
 	"slices"
 )
 
+// RunLogic handles one full run of the program with given arguments, returning a PageContent struct containing the results (routes, max turns, etc)
 func RunLogic(args []string, algorithms []string) (PageContent, error) {
+	if algorithms == nil {
+		return PageContent{}, fmt.Errorf("No pathfinding algorithm selected.")
+	}
 	config, err := GetAndValidateUserInput(args)
 	if err != nil {
 		return PageContent{}, err
@@ -22,7 +26,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		Summaries:       make([]Summary, 0),
 	}
 
-	if NumLines > 25000 {
+	if NumLines > 25000 { // don't do graph if it's too big for svg to handle
 		content.GraphVisibility = false
 	}
 
@@ -30,11 +34,11 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 
 	edgeNetwork := network.ConvertIntoFlow(config.StartStation, config.EndStation)
 
+	// run all selected algorithms, appending each result to the []Summaries
 	if slices.Contains(algorithms, "dijkstra") {
 		dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.Dijkstra)
 		fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
-		fmt.Println(trainRoutes)
 		summary := Summary{
 			Name:        "dijkstra",
 			TrainRoutes: trainRoutes,
@@ -109,7 +113,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 		routes = append(routes, v.Route)
 	}
 
-	if content.GraphVisibility {
+	if content.GraphVisibility && config.Server {
 		turnData, err := PrintTurns(content.Summaries[0].TrainRoutes, content.Summaries[0].MaxTurns)
 		if err != nil {
 			return PageContent{}, err
