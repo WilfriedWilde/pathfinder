@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	i "pathfinder/internal"
 	"slices"
 )
@@ -69,6 +70,7 @@ func (s *ServerInit) HandleInitData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(s)
 }
 
+// GetAllFilesData gets all of the file names and the station names contained within, appending those to the ServerInit struct
 func (s *ServerInit) GetAllFilesData() error {
 	root := os.DirFS("networks/")
 
@@ -77,28 +79,20 @@ func (s *ServerInit) GetAllFilesData() error {
 		return err
 	}
 
-	fileNames := make(map[string]string)
-
 	s.FileNames = make([]string, 0)
 	s.FileStations = make(map[string][]string, 0)
 
-	for _, v := range txtFiles {
-		fileNames[v] = "networks/" + v
-	}
+	for _, file := range txtFiles {
+		name := filepath.Base(file)
+		s.FileNames = append(s.FileNames, name)
 
-	s.FileStations = make(map[string][]string, 0)
-	for key := range fileNames {
-		s.FileNames = append(s.FileNames, key)
+		stations, err := i.GetStationNames("networks/" + file)
+		if err != nil {
+			return fmt.Errorf("Error trying to fetch stations from %s: %v", file, err)
+		}
+		s.FileStations[name] = stations
 	}
 	slices.Sort(s.FileNames)
-
-	for _, name := range s.FileNames {
-		statioNames, err := i.GetStationNames(fileNames[name])
-		if err != nil {
-			return err
-		}
-		s.FileStations[name] = append(s.FileStations[name], statioNames...)
-	}
 
 	return nil
 }
