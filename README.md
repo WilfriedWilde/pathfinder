@@ -46,7 +46,7 @@ Visualization (including turn-by-turn animated trains) shown on the server (so l
 
 Benchmarking different algorithms by both runtime and by length of solution in turns.  
 
-##Algorithms used:<br>
+## Algorithms used:<br>
 - "Greedy" BFS: Finds shortest path, removes used stations, repeat.
 - Edmonds-Karp and Dinic: Find shortest path, try to augment by finding shortest-by-edges augmenting paths from start to end, thus increasing the flow.
 - Bellman-Ford and Dijkstra + Potentials: Same as above, but shortest-by-length instead, often resulting in better set of routes found.
