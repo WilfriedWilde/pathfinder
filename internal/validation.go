@@ -195,18 +195,16 @@ func ValidateNetwork(network p.Network, hasStationsSection, hasConnectionsSectio
 	_, foundStart := network.Stations[config.StartStation]
 	_, foundEnd := network.Stations[config.EndStation]
 
-	if !config.Server {
-		if !foundStart {
-			return fmt.Errorf("Error: start station does not exist")
-		}
+	if !foundStart {
+		return fmt.Errorf("Error: start station does not exist")
+	}
 
-		if !foundEnd {
-			return fmt.Errorf("Error: end station does not exist")
-		}
+	if !foundEnd {
+		return fmt.Errorf("Error: end station does not exist")
+	}
 
-		if _, found := p.BFS(&network, config.StartStation, config.EndStation); !found {
-			return fmt.Errorf("Error: No paths found between starting and ending stations")
-		}
+	if _, found := p.BFS(&network, config.StartStation, config.EndStation); !found {
+		return fmt.Errorf("Error: No paths found between starting and ending stations")
 	}
 
 	// check max number stations
