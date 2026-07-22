@@ -4,6 +4,16 @@
 	box-sizing: border-box;
 }
 
+@font-face {
+	font-family: "Jetbrains";
+	src: url("/static/fonts/JetBrainsMono.ttf");
+}
+
+@font-face {
+	font-family: "Inter";
+	src: url("/static/fonts/Inter.ttf");
+}
+
 :root {
 	--color-background: #0A0A0A;
 	--color-text: #FAFAF8;
@@ -11,6 +21,8 @@
 	--color-accent: #00FF9C;
 	--color-surface: #1A1A1A;
 	--color-border: #2C2C2C;
+	--font-header: "Jetbrains", monospace;
+	--font-body: "Inter", sans-serif;
 }
 
 .station text {	display: none; }
