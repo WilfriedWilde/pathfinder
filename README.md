@@ -12,7 +12,11 @@ It then prints out the train movements, turn by turn.
 
 `cd pathfinder`
 
+Then either
+
 `go run . [INPUTFILEPATH] [STARTSTATION] [ENDSTATION] [TRAINNUMBER]` for the default CLI mode.  
+
+or
 
 `go run . -s` to launch the server at http://localhost:8081/  
 
