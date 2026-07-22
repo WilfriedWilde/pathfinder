@@ -30,6 +30,7 @@ func StartServer(serverInit ServerInit) {
 	}
 }
 
+// HandleRoot handles the mainpage, calling RunLogic() on form submissions, and executing the template with the results
 func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
