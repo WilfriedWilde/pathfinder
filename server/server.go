@@ -49,7 +49,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 
 		data, err = i.RunLogic(args, algorithms)
 		if err != nil {
-			data.ErrorMessage = "Error: No paths found between starting and ending stations"
+			data.ErrorMessage = err.Error()
 		}
 	}
 
