@@ -49,5 +49,6 @@ Benchmarking different algorithms by both runtime and by length of solution in t
 ## Algorithms used:<br>
 - "Greedy" BFS: Find shortest path, remove used stations, repeat.
 - "Max-Flow" Edmonds-Karp and Dinic: Find shortest path, try to augment by finding shortest-by-edges augmenting paths from start to end, thus increasing the flow.  
-Dinic being more clever in the way it does this, resulting in faster runtime.
-- "Min-Cost Max-Flow" Bellman-Ford and Dijkstra + Potentials: Same as above, but shortest-by-length instead, often resulting in better set of routes found. Bellman-Ford falls off fast on bigger inputs, potentially taking minutes to get a result, Dijkstra remains fast.
+Dinic being more clever in the way it does this (repeated DFS), resulting in faster runtime.
+- "Min-Cost Max-Flow" Bellman-Ford and Dijkstra + Potentials: Same as above, but shortest-by-length instead, often resulting in better set of routes found.  
+Bellman-Ford falls off fast on bigger inputs, potentially taking minutes to get a result, Dijkstra remains fast.
