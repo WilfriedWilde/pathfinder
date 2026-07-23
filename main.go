@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	i "pathfinder/internal"
@@ -39,6 +40,10 @@ func main() {
 		log.Fatal("Error: too many arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	}
 
+	if len(content.Summaries) == 0 {
+		fmt.Println("teg testing")
+		return
+	}
 	_, err = i.PrintTurns(content.Summaries[0].TrainRoutes, content.Summaries[0].MaxTurns)
 	if err != nil {
 		log.Fatal(err)
