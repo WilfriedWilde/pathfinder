@@ -383,4 +383,5 @@ form button:hover {
 	text-align: center;
     color: var(--color-background);
     font-family: var(--font-header);
+	width: 120px;
 }
