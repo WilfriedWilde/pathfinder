@@ -69,20 +69,27 @@ func Dijkstra(f *FlowNetwork, start, end int) ([]int, bool) {
 		distance[i] = math.MaxInt32
 		parents[i] = -1
 	}
+
 	distance[start] = 0
+
 	prioQueue := &PriorityQueue{}
 	heap.Init(prioQueue)
 	heap.Push(prioQueue, Node{start, 0})
+
 	for prioQueue.Len() != 0 {
 		curr := heap.Pop(prioQueue).(Node)
+
 		if curr.Dist != distance[curr.ID] {
 			continue
 		}
+
 		for _, edge := range f.Connections[curr.ID] {
 			if !edge.Usable {
 				continue
 			}
+
 			cost := edge.Cost + f.Potential[curr.ID] - f.Potential[edge.To]
+
 			if distance[curr.ID]+cost < distance[edge.To] {
 				distance[edge.To] = distance[curr.ID] + cost
 				parents[edge.To] = curr.ID
@@ -94,11 +101,13 @@ func Dijkstra(f *FlowNetwork, start, end int) ([]int, bool) {
 	if distance[end] == math.MaxInt32 { // no path found
 		return nil, false
 	}
+
 	for i := range distance {
 		if distance[i] != math.MaxInt32 {
 			f.Potential[i] += distance[i]
 		}
 	}
+
 	return parents, true
 }
 

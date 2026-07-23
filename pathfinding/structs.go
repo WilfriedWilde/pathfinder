@@ -14,7 +14,7 @@ type FlowNetwork struct {
 	IDToName    map[int]string
 	NameToID    map[string]int
 	Connections map[int][]*Edge
-	Levels      map[int]int // For each station, stores its level (distance from the start to this station in number of stations) - Used in BFS level
+	Levels      map[int]int // For each station, stores its level (distance from the start to this station in number of edges) - Used in BFS level
 	StartEdges  map[int]int // For each station, stores the start edge index - Used in the DFS blocking flow
 	Potential   []int       // Used for Dijkstra implementation
 }
