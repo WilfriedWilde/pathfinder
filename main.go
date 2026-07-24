@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	i "pathfinder/internal"
@@ -41,7 +40,6 @@ func main() {
 	}
 
 	if len(content.Summaries) == 0 {
-		fmt.Println("teg testing")
 		return
 	}
 	_, err = i.PrintTurns(content.Summaries[0].TrainRoutes, content.Summaries[0].MaxTurns)

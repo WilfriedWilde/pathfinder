@@ -1,7 +1,9 @@
 package pathfinding
 
 import (
+	"container/heap"
 	"fmt"
+	"math"
 	"slices"
 )
 
@@ -42,6 +44,7 @@ func (f *FlowNetwork) CreateTEGNetwork(maxTime int) *TEGNetwork {
 			id++
 		}
 	}
+	teg.FlowNetwork.Potential = make([]int, len(teg.NodeToID))
 	return teg
 }
 
@@ -51,11 +54,20 @@ func (t *TEGNetwork) AddNeighborEdges(f *FlowNetwork, maxTime int) {
 			if !edge.Original {
 				continue
 			}
-			for time := 0; time < maxTime; time++ {
-				from := TEGNode{station, time}
-				to := TEGNode{edge.To, time + edge.Cost}
-				addEdge(t.Connections, t.NodeToID[from], t.NodeToID[to], 1)
+			if edge.Cost == 0 {
+				for time := 0; time <= maxTime; time++ {
+					from := TEGNode{station, time}
+					to := TEGNode{edge.To, time + edge.Cost}
+					addEdge(t.Connections, t.NodeToID[from], t.NodeToID[to], 0)
+				}
+			} else {
+				for time := 0; time < maxTime; time++ {
+					from := TEGNode{station, time}
+					to := TEGNode{edge.To, time + edge.Cost}
+					addEdge(t.Connections, t.NodeToID[from], t.NodeToID[to], 1)
+				}
 			}
+
 		}
 	}
 }
@@ -66,7 +78,7 @@ func (t *TEGNetwork) AddSelfEdges(maxTime, start, end int) {
 			continue
 		}
 		next := TEGNode{node.StationID, node.Time + 1}
-		addEdge(t.Connections, id, t.NodeToID[next], 1)
+		addEdge(t.Connections, id, t.NodeToID[next], 0)
 		if node.StationID == start || node.StationID == end {
 			edges := t.Connections[id]
 			edges[len(edges)-1].Unlimited = true
@@ -104,15 +116,20 @@ func (t *TEGNetwork) GetStationID(station, time int) int {
 
 func (t *TEGNetwork) FindRoute(start, end, maxTime int) ([]int, int, bool) {
 	startID := t.NodeToID[TEGNode{start, 0}]
+	parents, distance, _ := TEGDijkstra(&t.FlowNetwork, startID)
+	bestID := -1
+	bestDist := math.MaxInt32
 	for i := 0; i <= maxTime; i++ {
 		endID := t.NodeToID[TEGNode{end, i}]
-
-		parents, found := BFSFlow(&t.FlowNetwork, startID, endID)
-		if found {
-			return parents, endID, true
+		if distance[endID] < bestDist {
+			bestDist = distance[endID]
+			bestID = endID
 		}
 	}
-	return nil, -1, false
+	if bestID == -1 {
+		return nil, -1, false
+	}
+	return parents, bestID, true
 }
 
 func (t *TEGNetwork) ExtractPath(parents []int, start, end int) []TEGNode {
@@ -148,7 +165,7 @@ func (t *TEGNetwork) DoableInXTurns(f *FlowNetwork, start, end, trainNum, maxTur
 			prev := usedEdges[station]
 			for _, edge := range t.Connections[prev] {
 
-				if edge.To == station && edge.Usable {
+				if edge.Original && edge.To == station && edge.Usable {
 					if !edge.Unlimited {
 						edge.Usable = false
 						t.Connections[station][edge.Rev].Usable = true
@@ -157,7 +174,6 @@ func (t *TEGNetwork) DoableInXTurns(f *FlowNetwork, start, end, trainNum, maxTur
 				}
 
 			}
-
 		}
 
 		flow++
@@ -177,6 +193,7 @@ func (t *TEGNetwork) ExtractTEGPaths(f *FlowNetwork, flow, start, end int) [][]s
 	path := make([]string, 0)
 
 	for range flow {
+
 		startID := t.NodeToID[TEGNode{start, 0}]
 
 		curr := startID
@@ -205,4 +222,52 @@ func (t *TEGNetwork) ExtractTEGPaths(f *FlowNetwork, flow, start, end int) [][]s
 	}
 
 	return paths
+}
+
+func TEGDijkstra(f *FlowNetwork, start int) ([]int, []int, bool) {
+	distance := make([]int, len(f.IDToName))
+	parents := make([]int, len(f.IDToName))
+	for i := range distance {
+		distance[i] = math.MaxInt32
+		parents[i] = -1
+	}
+
+	distance[start] = 0
+
+	prioQueue := &PriorityQueue{}
+	heap.Init(prioQueue)
+	heap.Push(prioQueue, Node{start, 0})
+
+	for prioQueue.Len() != 0 {
+		curr := heap.Pop(prioQueue).(Node)
+
+		if curr.Dist != distance[curr.ID] {
+			continue
+		}
+
+		for _, edge := range f.Connections[curr.ID] {
+			if !edge.Usable {
+				continue
+			}
+
+			cost := edge.Cost + f.Potential[curr.ID] - f.Potential[edge.To]
+			if cost < 0 {
+				panic("negative")
+			}
+
+			if distance[curr.ID]+cost < distance[edge.To] {
+				distance[edge.To] = distance[curr.ID] + cost
+				parents[edge.To] = curr.ID
+				heap.Push(prioQueue, Node{edge.To, distance[edge.To]})
+			}
+		}
+	}
+
+	for i := range distance {
+		if distance[i] != math.MaxInt32 {
+			f.Potential[i] += distance[i]
+		}
+	}
+
+	return parents, distance, true
 }
