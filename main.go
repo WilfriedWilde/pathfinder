@@ -31,7 +31,12 @@ func main() {
 		log.Fatal("Error: too few arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	} else if argsLength == 4 {
 		// Default mode
-		content, err = i.RunLogic(os.Args[1:], []string{"dijkstra"})
+		userAlgorithm, err := i.GetUserAlgorithm()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		content, err = i.RunLogic(os.Args[1:], []string{userAlgorithm})
 		if err != nil {
 			log.Fatal(err)
 		}
