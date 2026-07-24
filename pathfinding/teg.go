@@ -1,6 +1,9 @@
 package pathfinding
 
-import "slices"
+import (
+	"fmt"
+	"slices"
+)
 
 type TEGNode struct {
 	StationID int
@@ -27,8 +30,8 @@ func (f *FlowNetwork) CreateTEGNetwork(maxTime int) *TEGNetwork {
 	id := 0
 
 	for station := range f.IDToName {
-		for i := 0; i <= maxTime; i++ {
-			phNode := TEGNode{station, i}
+		for time := 0; time <= maxTime; time++ {
+			phNode := TEGNode{station, time}
 			teg.IDToNode[id] = phNode
 			teg.NodeToID[phNode] = id
 
@@ -48,40 +51,46 @@ func (t *TEGNetwork) AddNeighborEdges(f *FlowNetwork, maxTime int) {
 			if !edge.Original {
 				continue
 			}
-			for i := 0; i < maxTime; i++ {
-				from := TEGNode{station, i}
-				to := TEGNode{edge.To, i + 1}
+			for time := 0; time < maxTime; time++ {
+				from := TEGNode{station, time}
+				to := TEGNode{edge.To, time + edge.Cost}
 				addEdge(t.Connections, t.NodeToID[from], t.NodeToID[to], 1)
 			}
 		}
 	}
 }
 
-func (t *TEGNetwork) AddSelfEdges(maxTime int) {
+func (t *TEGNetwork) AddSelfEdges(maxTime, start, end int) {
 	for node, id := range t.NodeToID {
 		if node.Time == maxTime {
 			continue
 		}
 		next := TEGNode{node.StationID, node.Time + 1}
 		addEdge(t.Connections, id, t.NodeToID[next], 1)
+		if node.StationID == start || node.StationID == end {
+			edges := t.Connections[id]
+			edges[len(edges)-1].Unlimited = true
+		}
 	}
 }
 
-func (f *FlowNetwork) EstimateTEGViability(trains int) (int, bool) {
-	shortestPath, found := BFSFlow(f, 0, 1) // start, end
+func (n *Network) EstimateTEGViability(start, end string, trains int) (int, bool) {
+	shortestPath, found := BFS(n, start, end) // start, end
 	if !found {
 		return 0, false
 	}
 	maxTime := len(shortestPath) + trains
-	stationCount := len(f.IDToName) * maxTime
+	stationCount := len(n.Connections) * 2 // roughly account for splits
+	stationCount *= maxTime                // # of layers in teg
 
 	edgeCount := 0
 
-	for _, edges := range f.Connections {
-		edgeCount += len(edges)
+	for _, connections := range n.Connections {
+		edgeCount += len(connections)
 	}
 
-	edgeCount *= maxTime
+	edgeCount = edgeCount*2 + len(n.Connections)*2 // split all, account for new edges between station_in and station_out and for waiting edges between layers
+	edgeCount *= maxTime                           // roughly account for teg layers
 
 	if stationCount < 30000 && edgeCount < 150000 {
 		return maxTime, true
@@ -94,25 +103,106 @@ func (t *TEGNetwork) GetStationID(station, time int) int {
 }
 
 func (t *TEGNetwork) FindRoute(start, end, maxTime int) ([]int, int, bool) {
+	startID := t.NodeToID[TEGNode{start, 0}]
 	for i := 0; i <= maxTime; i++ {
-		startID := t.GetStationID(start, 0)
-		endID := t.GetStationID(end, i)
+		endID := t.NodeToID[TEGNode{end, i}]
 
-		route, found := BFSFlow(&t.FlowNetwork, startID, endID)
+		parents, found := BFSFlow(&t.FlowNetwork, startID, endID)
 		if found {
-			return route, endID, true
+			return parents, endID, true
 		}
 	}
 	return nil, -1, false
 }
 
 func (t *TEGNetwork) ExtractPath(parents []int, start, end int) []TEGNode {
-	res := []TEGNode{}
+	res := []TEGNode{t.IDToNode[end]}
 
 	for end != -1 {
-		res = append(res, t.IDToNode[end])
+		fmt.Println(t.IDToNode[end])
+		if t.IDToNode[end].StationID%2 == 0 {
+			res = append(res, t.IDToNode[end])
+		}
+
 		end = parents[end]
 	}
 	slices.Reverse(res)
 	return res
+}
+
+func (t *TEGNetwork) DoableInXTurns(f *FlowNetwork, start, end, trainNum, maxTurns int) ([][]string, bool) {
+
+	routesSets := make([][]string, 0)
+	flow := 0
+	for {
+
+		usedEdges, endID, found := t.FindRoute(start, end, maxTurns)
+		if !found {
+			break
+		}
+
+		startID := t.NodeToID[TEGNode{start, 0}]
+
+		for station := endID; station != startID; station = usedEdges[station] {
+
+			prev := usedEdges[station]
+			for _, edge := range t.Connections[prev] {
+
+				if edge.To == station && edge.Usable {
+					if !edge.Unlimited {
+						edge.Usable = false
+						t.Connections[station][edge.Rev].Usable = true
+					}
+					break
+				}
+
+			}
+
+		}
+
+		flow++
+		if flow == trainNum {
+			routesSets = append(routesSets, t.ExtractTEGPaths(f, flow, start, end)...)
+		}
+	}
+
+	if flow < trainNum {
+		return nil, false
+	}
+	return routesSets, true
+}
+
+func (t *TEGNetwork) ExtractTEGPaths(f *FlowNetwork, flow, start, end int) [][]string {
+	paths := make([][]string, 0)
+	path := make([]string, 0)
+
+	for range flow {
+		startID := t.NodeToID[TEGNode{start, 0}]
+
+		curr := startID
+		path = []string{}
+
+		for t.IDToNode[curr].StationID != end {
+
+			for _, edge := range t.Connections[curr] {
+
+				if edge.Original && (edge.Unlimited || !edge.Usable) {
+					if !edge.Unlimited {
+						edge.Usable = true
+					}
+					if t.IDToNode[curr].StationID%2 == 0 {
+						path = append(path, f.IDToName[t.IDToNode[curr].StationID])
+					}
+
+					curr = edge.To
+					break
+				}
+			}
+		}
+
+		path = append(path, f.IDToName[end])
+		paths = append(paths, path)
+	}
+
+	return paths
 }

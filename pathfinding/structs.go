@@ -20,12 +20,13 @@ type FlowNetwork struct {
 }
 
 type Edge struct {
-	To       int
-	Usable   bool
-	Original bool
-	Rev      int
-	Cost     int // For Bellman-Ford and Dijkstra
-	Level    int // Used for Dinic
+	To        int
+	Usable    bool
+	Original  bool
+	Rev       int
+	Cost      int  // For Bellman-Ford and Dijkstra
+	Level     int  // Used for Dinic
+	Unlimited bool // for start node in TEG
 }
 
 type TrainRoute struct {

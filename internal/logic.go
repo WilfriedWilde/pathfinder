@@ -34,7 +34,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 
 	edgeNetwork := network.ConvertIntoFlow(config.StartStation, config.EndStation)
 
-	maxTime, tryTEG := edgeNetwork.EstimateTEGViability(config.NumTrains) // check if graph small enough to run TEG
+	maxTime, tryTEG := network.EstimateTEGViability(config.StartStation, config.EndStation, config.NumTrains) // check if graph small enough to run TEG
 
 	if !config.Server && tryTEG { // only run TEG if in default mode, too fiddly to bother with on server side
 		tegLogic(&edgeNetwork, maxTime, config.NumTrains)
