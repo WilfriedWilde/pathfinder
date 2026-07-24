@@ -1,10 +1,7 @@
 package pathfinding
 
 import (
-	"container/heap"
-	"fmt"
 	"math"
-	"slices"
 )
 
 type TEGNode struct {
@@ -44,7 +41,6 @@ func (f *FlowNetwork) CreateTEGNetwork(maxTime int) *TEGNetwork {
 			id++
 		}
 	}
-	teg.FlowNetwork.Potential = make([]int, len(teg.NodeToID))
 	return teg
 }
 
@@ -57,7 +53,7 @@ func (t *TEGNetwork) AddNeighborEdges(f *FlowNetwork, maxTime int) {
 			if edge.Cost == 0 {
 				for time := 0; time <= maxTime; time++ {
 					from := TEGNode{station, time}
-					to := TEGNode{edge.To, time + edge.Cost}
+					to := TEGNode{edge.To, time}
 					addEdge(t.Connections, t.NodeToID[from], t.NodeToID[to], 0)
 				}
 			} else {
@@ -110,41 +106,35 @@ func (n *Network) EstimateTEGViability(start, end string, trains int) (int, bool
 	return 0, false
 }
 
-func (t *TEGNetwork) GetStationID(station, time int) int {
-	return t.NodeToID[TEGNode{station, time}]
-}
-
 func (t *TEGNetwork) FindRoute(start, end, maxTime int) ([]int, int, bool) {
 	startID := t.NodeToID[TEGNode{start, 0}]
-	parents, distance, _ := TEGDijkstra(&t.FlowNetwork, startID)
+
 	bestID := -1
-	bestDist := math.MaxInt32
+	bestDistance := math.MaxInt32
+	var bestParents []int
+
 	for i := 0; i <= maxTime; i++ {
 		endID := t.NodeToID[TEGNode{end, i}]
-		if distance[endID] < bestDist {
-			bestDist = distance[endID]
+		parents, found := BFSFlow(&t.FlowNetwork, startID, endID)
+		if !found {
+			continue
+		}
+
+		distance := 0
+		for curr := endID; curr != startID; curr = parents[curr] {
+			distance++
+		}
+		if distance < bestDistance {
+			bestDistance = distance
 			bestID = endID
+			bestParents = parents
 		}
 	}
+
 	if bestID == -1 {
 		return nil, -1, false
 	}
-	return parents, bestID, true
-}
-
-func (t *TEGNetwork) ExtractPath(parents []int, start, end int) []TEGNode {
-	res := []TEGNode{t.IDToNode[end]}
-
-	for end != -1 {
-		fmt.Println(t.IDToNode[end])
-		if t.IDToNode[end].StationID%2 == 0 {
-			res = append(res, t.IDToNode[end])
-		}
-
-		end = parents[end]
-	}
-	slices.Reverse(res)
-	return res
+	return bestParents, bestID, true
 }
 
 func (t *TEGNetwork) DoableInXTurns(f *FlowNetwork, start, end, trainNum, maxTurns int) ([][]string, bool) {
@@ -222,52 +212,4 @@ func (t *TEGNetwork) ExtractTEGPaths(f *FlowNetwork, flow, start, end int) [][]s
 	}
 
 	return paths
-}
-
-func TEGDijkstra(f *FlowNetwork, start int) ([]int, []int, bool) {
-	distance := make([]int, len(f.IDToName))
-	parents := make([]int, len(f.IDToName))
-	for i := range distance {
-		distance[i] = math.MaxInt32
-		parents[i] = -1
-	}
-
-	distance[start] = 0
-
-	prioQueue := &PriorityQueue{}
-	heap.Init(prioQueue)
-	heap.Push(prioQueue, Node{start, 0})
-
-	for prioQueue.Len() != 0 {
-		curr := heap.Pop(prioQueue).(Node)
-
-		if curr.Dist != distance[curr.ID] {
-			continue
-		}
-
-		for _, edge := range f.Connections[curr.ID] {
-			if !edge.Usable {
-				continue
-			}
-
-			cost := edge.Cost + f.Potential[curr.ID] - f.Potential[edge.To]
-			if cost < 0 {
-				panic("negative")
-			}
-
-			if distance[curr.ID]+cost < distance[edge.To] {
-				distance[edge.To] = distance[curr.ID] + cost
-				parents[edge.To] = curr.ID
-				heap.Push(prioQueue, Node{edge.To, distance[edge.To]})
-			}
-		}
-	}
-
-	for i := range distance {
-		if distance[i] != math.MaxInt32 {
-			f.Potential[i] += distance[i]
-		}
-	}
-
-	return parents, distance, true
 }
