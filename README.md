@@ -16,6 +16,8 @@ Then either
 
 `go run . [INPUTFILEPATH] [STARTSTATION] [ENDSTATION] [TRAINNUMBER]` for the default CLI mode.  
 
+The program then asks you to select an algorithm of your choice before running the logic.
+
 or
 
 `go run . -s` to launch the server mode. 
