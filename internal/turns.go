@@ -44,8 +44,6 @@ func PrintTurns(summary Summary) ([]string, error) {
 		}
 	}
 
-	fmt.Printf("Execution time: %v\n\n", summary.TimeTaken)
-
 	// store output for visualization and print it to terminal
 	for turnNum, turn := range turns {
 		if turnNum <= turnCAP {
@@ -54,6 +52,8 @@ func PrintTurns(summary Summary) ([]string, error) {
 
 		fmt.Println(turn.String())
 	}
+
+	fmt.Printf("Execution time: %v\n\n", summary.TimeTaken)
 
 	return ret, nil
 }

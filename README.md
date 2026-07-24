@@ -4,7 +4,7 @@
 
 A CLI (/localhost) tool that calculates the minimum number of turns required to move the given amount of trains from the starting position to the goal.
 
-It then prints out the time taken by the pathfinding algorithm, followed by train movements, turn by turn.
+It then prints out train movements, turn by turn, followed by the time taken by the pathfinding algorithm.
 
 ## Setup and Usage <br>
 
@@ -23,6 +23,7 @@ or
 `go run . -s` to launch the server mode. 
 
 The server mode is accessible at `http://localhost:8081/`  
+
 - Select an input file from the list (can manually add in your own files into networks/)  
 - Select the starting and ending locations from the next two lists  
 - Type in the number of trains to use (capped at a million)  

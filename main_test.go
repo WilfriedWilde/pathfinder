@@ -660,31 +660,33 @@ func TestRunLogic(t *testing.T) {
 func TestPrintTurns(t *testing.T) {
 	tests := []struct {
 		name     string
-		routes   []p.TrainRoute
-		maxTurns int
+		summary  i.Summary
 		expected []string
 	}{
 		{
 			name: "mandatory task test",
-			routes: []p.TrainRoute{
-				{
-					RouteLength: 2,
-					Route: []string{
-						"victoria",
-						"st_pancras",
+			summary: i.Summary{
+				TrainRoutes: []p.TrainRoute{
+					{
+						RouteLength: 2,
+						Route: []string{
+							"victoria",
+							"st_pancras",
+						},
+						Trains: 2,
 					},
-					Trains: 2,
-				},
-				{
-					RouteLength: 2,
-					Route: []string{
-						"euston",
-						"st_pancras",
+					{
+						RouteLength: 2,
+						Route: []string{
+							"euston",
+							"st_pancras",
+						},
+						Trains: 2,
 					},
-					Trains: 2,
 				},
+				MaxTurns: 3,
 			},
-			maxTurns: 3,
+
 			expected: []string{
 				"T1-victoria T2-euston",
 				"T1-st_pancras T2-st_pancras T3-victoria T4-euston",
@@ -695,7 +697,7 @@ func TestPrintTurns(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := i.PrintTurns(tt.routes, tt.maxTurns)
+			got, err := i.PrintTurns(tt.summary)
 			if err != nil {
 				t.Fatalf("PrintTurns() error = %v", err)
 			}
