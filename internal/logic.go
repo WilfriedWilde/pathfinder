@@ -117,7 +117,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 	}
 
 	if content.GraphVisibility && config.Server {
-		turnData, err := PrintTurns(content.Summaries[0].TrainRoutes, content.Summaries[0].MaxTurns)
+		turnData, err := PrintTurns(content.Summaries[0])
 		if err != nil {
 			return PageContent{}, err
 		}

@@ -44,7 +44,7 @@ func main() {
 		log.Fatal("Error: too many arguments in command line\nUsage:\ngo run . [path to file containing network map] [start station] [end station] [number of trains]")
 	}
 
-	_, err = i.PrintTurns(content.Summaries[0].TrainRoutes, content.Summaries[0].MaxTurns)
+	_, err = i.PrintTurns(content.Summaries[0])
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	p "pathfinder/pathfinding"
 	"strconv"
 	"strings"
 )
@@ -10,7 +9,10 @@ import (
 // PrintTurns prints and returns each turn, informing about which train are moving to which station.
 //
 // Build the output one train at a time, not one turn at a time.
-func PrintTurns(trainRoutes []p.TrainRoute, maxTurns int) ([]string, error) {
+func PrintTurns(summary Summary) ([]string, error) {
+	trainRoutes := summary.TrainRoutes
+	maxTurns := summary.MaxTurns
+
 	if maxTurns == -1 {
 		return nil, fmt.Errorf("Something went wrong with pathfinding, no valid routes found.")
 	}
@@ -41,6 +43,8 @@ func PrintTurns(trainRoutes []p.TrainRoute, maxTurns int) ([]string, error) {
 			trainLabel++
 		}
 	}
+
+	fmt.Printf("Execution time: %v\n\n", summary.TimeTaken)
 
 	// store output for visualization and print it to terminal
 	for turnNum, turn := range turns {
