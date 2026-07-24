@@ -4,7 +4,7 @@
 
 A CLI (/localhost) tool that calculates the minimum number of turns required to move the given amount of trains from the starting position to the goal.
 
-It then prints out the train movements, turn by turn.
+It then prints out the time taken by the pathfinding algorithm, followed by train movements, turn by turn.
 
 ## Setup and Usage <br>
 
