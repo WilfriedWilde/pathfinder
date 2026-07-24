@@ -73,12 +73,22 @@ func (t *TEGNetwork) AddSelfEdges(maxTime, start, end int) {
 		if node.Time == maxTime {
 			continue
 		}
-		next := TEGNode{node.StationID, node.Time + 1}
-		addEdge(t.Connections, id, t.NodeToID[next], 0)
+
 		if node.StationID == start || node.StationID == end {
+			next := TEGNode{node.StationID, node.Time + 1}
+			addEdge(t.Connections, id, t.NodeToID[next], 0)
 			edges := t.Connections[id]
 			edges[len(edges)-1].Unlimited = true
+			continue
 		}
+
+		if node.StationID%2 == 0 {
+			continue
+		}
+
+		next := TEGNode{node.StationID - 1, node.Time + 1}
+		addEdge(t.Connections, id, t.NodeToID[next], 0)
+
 	}
 }
 
