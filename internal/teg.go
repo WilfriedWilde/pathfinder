@@ -15,7 +15,6 @@ func tegLogic(f *p.FlowNetwork, maxTime, trains int, start string) {
 		tegNetwork := f.CreateTEGNetwork(maxTime)
 		tegNetwork.AddNeighborEdges(f, maxTime)
 		tegNetwork.AddSelfEdges(maxTime, 0, 1)
-		tegNetwork.Potential = make([]int, len(tegNetwork.IDToName))
 		_, possible := tegNetwork.DoableInXTurns(f, 0, 1, trains, maxTime)
 		if !possible {
 			maxTime++
@@ -26,7 +25,6 @@ func tegLogic(f *p.FlowNetwork, maxTime, trains int, start string) {
 	tegNetwork = f.CreateTEGNetwork(maxTime)
 	tegNetwork.AddNeighborEdges(f, maxTime)
 	tegNetwork.AddSelfEdges(maxTime, 0, 1)
-	tegNetwork.Potential = make([]int, len(tegNetwork.IDToName))
 	routes, _ := tegNetwork.DoableInXTurns(f, 0, 1, trains, maxTime)
 
 	printTEGOutput(routes, start)
