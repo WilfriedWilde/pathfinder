@@ -36,7 +36,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 
 	// run all selected algorithms, appending each result to the []Summaries
 	if slices.Contains(algorithms, "dijkstra") {
-		dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.Dijkstra)
+		dijkstraRouteSets, _, dijkstraTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], config.NumTrains, p.Dijkstra)
 		fastestDijkstraRoutes := GetFastestRouteSet(dijkstraRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsDijkstra := divert(fastestDijkstraRoutes, config.NumTrains)
 		summary := Summary{
@@ -50,7 +50,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 	}
 
 	if slices.Contains(algorithms, "bellman") {
-		mcmfRouteSets, _, bellFordTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.BellmanFord)
+		mcmfRouteSets, _, bellFordTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], config.NumTrains, p.BellmanFord)
 		fastestMCMFRoutes := GetFastestRouteSet(mcmfRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsMCMF := divert(fastestMCMFRoutes, config.NumTrains)
 
@@ -80,7 +80,7 @@ func RunLogic(args []string, algorithms []string) (PageContent, error) {
 	}
 
 	if slices.Contains(algorithms, "edmonds") {
-		ekRouteSets, _, ekTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], p.BFSFlow)
+		ekRouteSets, _, ekTime := edgeNetwork.GetRoutesSets(edgeNetwork.NameToID[config.StartStation], edgeNetwork.NameToID[config.EndStation], config.NumTrains, p.BFSFlow)
 		fastestEKRoutes := GetFastestRouteSet(ekRouteSets, config.NumTrains)
 		trainRoutes, maxTurnsEK := divert(fastestEKRoutes, config.NumTrains)
 
