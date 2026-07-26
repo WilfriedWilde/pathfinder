@@ -1,7 +1,6 @@
 package pathfinding
 
 import (
-	"fmt"
 	"slices"
 	"time"
 )
@@ -65,7 +64,6 @@ func (f *FlowNetwork) GetRoutesSets(start, end, trains int, pathfinder func(f *F
 	}
 
 	routesSets = append(routesSets, routeSet) // add the "leftover" [][] from !found
-	fmt.Println(routesSets)
 
 	return routesSets, flow, time.Since(now)
 }
