@@ -24,7 +24,7 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 	// check if number of train is valid positive integer
 	config.NumTrains, err = strconv.Atoi(numTrainsStr)
 	if err != nil || config.NumTrains < 1 || config.NumTrains > 1000001 {
-		return Config{}, fmt.Errorf("Error: number of train should be a positive integer in range 1 < number of trains < 1000000")
+		return Config{}, fmt.Errorf("Error: number of train should be a positive integer in range 1 < number of trains <= 1000000")
 	}
 
 	if len(args) == 5 {
