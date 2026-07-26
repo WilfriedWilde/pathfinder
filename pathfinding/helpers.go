@@ -34,7 +34,7 @@ func (f *FlowNetwork) GetRoutesSets(start, end, trains int, pathfinder func(f *F
 					edge.Usable = false
 					fCopy.Connections[station][edge.Rev].Usable = true
 
-					if edge.To%2 == 0 {
+					if edge.To%2 != 0 {
 						route = append(route, f.IDToName[edge.To])
 					}
 
