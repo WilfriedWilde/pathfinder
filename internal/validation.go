@@ -90,6 +90,11 @@ func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
 
 			stationName, xStr, yStr := strings.TrimSpace(split[0]), strings.TrimSpace(split[1]), strings.TrimSpace(split[2])
 
+			// check if station name is too long
+			if len(stationName) > 200 {
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station name too long, limit of 200 characters", lineNumber)
+			}
+
 			// check if station name is valid
 			if strings.ContainsFunc(stationName, func(r rune) bool {
 				return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_')
