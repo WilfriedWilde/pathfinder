@@ -22,17 +22,17 @@ func TestGetAndValidateUserInput(t *testing.T) {
 		"Number of train is 0": {
 			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "0"},
 			output: i.Config{},
-			err:    "Error: number of train should be a positive integer in range 1 < number of trains <= 1000000",
+			err:    "Error: number of train should be a positive integer in range 1 <= number of trains <= 1000000",
 		},
 		"Number of train is negative": {
 			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "-232"},
 			output: i.Config{},
-			err:    "Error: number of train should be a positive integer in range 1 < number of trains <= 1000000",
+			err:    "Error: number of train should be a positive integer in range 1 <= number of trains <= 1000000",
 		},
 		"Number of train is not numeric": {
 			input:  []string{"networks/1.txt", "waterloo", "st_pancras", "a"},
 			output: i.Config{},
-			err:    "Error: number of train should be a positive integer in range 1 < number of trains <= 1000000",
+			err:    "Error: number of train should be a positive integer in range 1 <= number of trains <= 1000000",
 		},
 		"Valid args": {
 			input: []string{"networks/1.txt", "waterloo", "st_pancras", "10"},
