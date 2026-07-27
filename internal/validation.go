@@ -24,7 +24,7 @@ func GetAndValidateUserInput(args []string) (config Config, err error) {
 	// check if number of train is valid positive integer
 	config.NumTrains, err = strconv.Atoi(numTrainsStr)
 	if err != nil || config.NumTrains < 1 || config.NumTrains > 1000001 {
-		return Config{}, fmt.Errorf("Error: number of train should be a positive integer in range 1 < number of trains < 1000000")
+		return Config{}, fmt.Errorf("Error: number of train should be a positive integer in range 1 < number of trains <= 1000000")
 	}
 
 	if len(args) == 5 {
@@ -89,6 +89,11 @@ func ParseAndValidateNetwork(config Config) (p.Network, int, error) {
 			}
 
 			stationName, xStr, yStr := strings.TrimSpace(split[0]), strings.TrimSpace(split[1]), strings.TrimSpace(split[2])
+
+			// check if station name is too long
+			if len(stationName) > 200 {
+				return p.Network{}, 0, fmt.Errorf("Error line %d: station name too long, limit of 200 characters", lineNumber)
+			}
 
 			// check if station name is valid
 			if strings.ContainsFunc(stationName, func(r rune) bool {
